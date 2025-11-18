@@ -487,102 +487,116 @@
             );
         };
 
-        const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
-            const roadmapSteps = getRoadmap(results.level);
-            const formattedScore = results.normalizedScore.toFixed(1);
+      // ⚠️ NOTA: Asegúrate de que las funciones 'getLevel' y la constante 'questionsData' estén definidas y accesibles
+// en el ámbito donde se encuentra 'ResultsScreen'. (No están en el código que me proporcionaste, pero son necesarias).
 
-            // 🛑 FUNCIÓN IMPLEMENTADA PARA DESCARGA DE PDF
-            const handleDownload = () => {
-                const element = document.getElementById('reporte-contenido');
-                
-                // Opciones de configuración para html2pdf
-                const options = {
-                    margin: 10,
-                    filename: `Reporte-Madurez-Digital-${companyInfo.name || 'Empresa'}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, logging: true, useCORS: true },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
+const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
+    // 1. Definición de variables y obtención de datos
+    const roadmapSteps = getRoadmap(results.level);
+    const formattedScore = results.normalizedScore.toFixed(1);
 
-                // html2pdf genera y descarga el archivo
-                html2pdf().set(options).from(element).save();
+    // 🛑 FUNCIÓN IMPLEMENTADA PARA DESCARGA DE PDF
+    const handleDownload = () => {
+        const element = document.getElementById('reporte-contenido');
+
+        // 💡 OPTIMIZACIÓN: Añadir un pequeño retraso para que los gráficos (canvas) se terminen de renderizar
+        setTimeout(() => {
+            // Opciones de configuración para html2pdf
+            const options = {
+                margin: 10,
+                // Usar || 'Empresa' para evitar un nombre de archivo roto si companyInfo.name es nulo
+                filename: `Reporte-Madurez-Digital-${companyInfo.name || 'Empresa'}.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 },
+                // Escala 3 recomendada para gráficos de alta calidad en PDF
+                html2canvas: { scale: 3, logging: true, useCORS: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            return (
-                <div className="content">
-                    {/* 🛑 Contenedor del reporte para la descarga */}
-                    <div id="reporte-contenido">
-                        <div className="score-hero" style={{ background: results.level.color }}>
-                            <div className="subtitle">Reporte de Madurez Digital para: **{companyInfo.name}**</div>
-                            <h1 className="score-value">{formattedScore}<span style={{ fontSize: '2rem', fontWeight: 500 }}>%</span></h1>
-                            <div className="score-label">Puntuación de Madurez General</div>
-                            <div className="level-badge" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}>{results.level.name}</div>
-                            <div style={{ marginTop: '20px', fontSize: '1.05rem', opacity: 0.9 }}>
-                                {results.level.desc}
-                            </div>
-                        </div>
+            // html2pdf genera y descarga el archivo
+            html2pdf().set(options).from(element).save();
+        }, 500); // Espera de 500ms
+    };
 
-                        <RadarChart results={results} />
-
-                        <div className="dimensions-grid">
-                            {Object.keys(results.dimensions).map(dimKey => {
-                                const dimResult = results.dimensions[dimKey];
-                                const dimData = questionsData[dimKey];
-                                const dimScore = dimResult.percentage.toFixed(1);
-
-                                return (
-                                    <div key={dimKey} className="dimension-result-card">
-                                        <h3>{dimData.icon} {dimData.title}</h3>
-                                        <div className="dimension-score">{dimScore}%</div>
-                                        <div className="dimension-bar">
-                                            <div className="dimension-bar-fill" style={{ width: `${dimScore}%` }}></div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        
-                        <div className="roadmap-section">
-                            <h3>{results.level.level < 5 ? "Próximos Pasos Recomendados" : "Excelencia Continua"}</h3>
-                            <p style={{ marginBottom: '30px', color: '#065f46', fontWeight: 500 }}>
-                                Basado en tu nivel de madurez **{results.level.name}**, este es el *roadmap* sugerido para avanzar al siguiente nivel:
-                            </p>
-                            <div className="roadmap-steps">
-                                {roadmapSteps.map((step, index) => (
-                                    <div key={index} className="roadmap-step">
-                                        <div className="roadmap-step-number">Paso {step.step}</div>
-                                        <h4>{step.title}</h4>
-                                        <p>{step.desc}</p>
-                                        <ul>
-                                            {step.actions.map((action, i) => <li key={i}>{action}</li>)}
-                                        </ul>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                    {/* Botones FUERA del contenedor de reporte */}
-                    <div className="action-buttons">
-                        <button className="btn btn-secondary" onClick={() => window.print()}>
-                            🖨️ Imprimir Reporte
-                        </button>
-                        <button className="btn btn-primary" onClick={handleDownload}>
-                            💾 Exportar PDF
-                        </button>
-                        <button className="btn btn-primary" onClick={() => {
-                             if(window.confirm('¿Estás seguro de que quieres reiniciar la evaluación? Todos los datos guardados se perderán.')){
-                                localStorage.removeItem('maturityData');
-                                setScreen('welcome');
-                                window.location.reload();
-                             }
-                        }}>
-                            🔄 Reiniciar Evaluación
-                        </button>
+    return (
+        <div className="content">
+            {/* 🛑 Contenedor del reporte para la descarga */}
+            <div id="reporte-contenido">
+                <div className="score-hero" style={{ background: results.level.color }}>
+                    <div className="subtitle">Reporte de Madurez Digital para: **{companyInfo.name}**</div>
+                    <h1 className="score-value">{formattedScore}<span style={{ fontSize: '2rem', fontWeight: 500 }}>%</span></h1>
+                    <div className="score-label">Puntuación de Madurez General</div>
+                    <div className="level-badge" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}>{results.level.name}</div>
+                    <div style={{ marginTop: '20px', fontSize: '1.05rem', opacity: 0.9 }}>
+                        {results.level.desc}
                     </div>
                 </div>
-            );
-        };
 
+                {/* Componente del gráfico */}
+                <RadarChart results={results} /> 
+
+                <div className="dimensions-grid">
+                    {/* Map de dimensiones: Asume que questionsData es accesible */}
+                    {Object.keys(results.dimensions).map(dimKey => {
+                        const dimResult = results.dimensions[dimKey];
+                        // ⚠️ CORRECCIÓN: Verifica que 'questionsData' exista y tenga la clave. 
+                        // Si no, esto podría fallar. (Asumimos que sí existe)
+                        const dimData = window.questionsData?.[dimKey] || { title: 'Dimensión Desconocida', icon: '❓' }; 
+                        const dimScore = dimResult.percentage.toFixed(1);
+
+                        return (
+                            <div key={dimKey} className="dimension-result-card">
+                                <h3>{dimData.icon} {dimData.title}</h3>
+                                <div className="dimension-score">{dimScore}%</div>
+                                <div className="dimension-bar">
+                                    <div className="dimension-bar-fill" style={{ width: `${dimScore}%` }}></div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+                
+                <div className="roadmap-section">
+                    <h3>{results.level.level < 5 ? "Próximos Pasos Recomendados" : "Excelencia Continua"}</h3>
+                    <p style={{ marginBottom: '30px', color: '#065f46', fontWeight: 500 }}>
+                        Basado en tu nivel de madurez **{results.level.name}**, este es el *roadmap* sugerido para avanzar al siguiente nivel:
+                    </p>
+                    <div className="roadmap-steps">
+                        {roadmapSteps.map((step, index) => (
+                            <div key={index} className="roadmap-step">
+                                <div className="roadmap-step-number">Paso {index + 1}</div> {/* Usar index + 1 o el valor correcto de step */}
+                                <h4>{step.title}</h4>
+                                <p>{step.desc}</p>
+                                <ul>
+                                    {/* ⚠️ CORRECCIÓN: Usar step.actions.map si actions es un array. */}
+                                    {step.actions && step.actions.map((action, i) => <li key={i}>{action}</li>)} 
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            {/* Botones FUERA del contenedor de reporte */}
+            <div className="action-buttons">
+                <button className="btn btn-secondary" onClick={() => window.print()}>
+                    🖨️ Imprimir Reporte
+                </button>
+                <button className="btn btn-primary" onClick={handleDownload}>
+                    💾 Exportar PDF
+                </button>
+                <button className="btn btn-primary" onClick={() => {
+                    // Lógica para reiniciar, mejor moverla a una función separada (resetApp) y pasarla como prop.
+                     if(window.confirm('¿Estás seguro de que quieres reiniciar la evaluación? Todos los datos guardados se perderán.')){
+                        localStorage.removeItem('maturityData');
+                        setScreen('welcome');
+                        window.location.reload();
+                     }
+                }}>
+                    🔄 Reiniciar Evaluación
+                </button>
+            </div>
+        </div>
+    );
+};
         // --- COMPONENTE PRINCIPAL (App) ---
 
         const App = () => {
