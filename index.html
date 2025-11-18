@@ -8,6 +8,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
@@ -47,7 +48,7 @@
         .question-card:hover { border-color: #3b82f6; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15); transform: translateY(-2px); }
         .question-card.answered { border-color: #10b981; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); }
         .question-header { display: flex; gap: 16px; margin-bottom: 20px; }
-        .question-number { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; min-width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); flex-shrink: 0; }
+        .question-number { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; min-width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; flex-shrink: 0; }
         .question-text { flex: 1; font-size: 1.1rem; line-height: 1.6; color: #1e293b; font-weight: 600; }
         .rating-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 12px; }
         .rating-option input[type="radio"] { display: none; }
@@ -202,7 +203,7 @@
             { value: 5, label: "5", desc: "Óptimo" }
         ];
 
-        // --- Funciones de Lógica y Cálculo (Mantenidas sin cambios) ---
+        // --- Funciones de Lógica y Cálculo (Mantenidos sin cambios) ---
 
         const getLevel = (score) => {
             if (score < 20) return { level: 0, name: "Nivel 0: Inicial", color: "#dc2626", desc: "Sin estrategia digital, procesos manuales" };
@@ -490,67 +491,83 @@
             const roadmapSteps = getRoadmap(results.level);
             const formattedScore = results.normalizedScore.toFixed(1);
 
+            // 🛑 FUNCIÓN IMPLEMENTADA PARA DESCARGA DE PDF
             const handleDownload = () => {
-                alert('Funcionalidad de descarga de PDF o datos no implementada en esta versión simple. Usa la opción "Imprimir" del navegador para guardar como PDF.');
+                const element = document.getElementById('reporte-contenido');
+                
+                // Opciones de configuración para html2pdf
+                const options = {
+                    margin: 10,
+                    filename: `Reporte-Madurez-Digital-${companyInfo.name || 'Empresa'}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, logging: true, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                // html2pdf genera y descarga el archivo
+                html2pdf().set(options).from(element).save();
             };
 
             return (
                 <div className="content">
-                    <div className="score-hero" style={{ background: results.level.color }}>
-                        <div className="subtitle">Reporte de Madurez Digital para: **{companyInfo.name}**</div>
-                        <h1 className="score-value">{formattedScore}<span style={{ fontSize: '2rem', fontWeight: 500 }}>%</span></h1>
-                        <div className="score-label">Puntuación de Madurez General</div>
-                        <div className="level-badge" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}>{results.level.name}</div>
-                        <div style={{ marginTop: '20px', fontSize: '1.05rem', opacity: 0.9 }}>
-                            {results.level.desc}
+                    {/* 🛑 Contenedor del reporte para la descarga */}
+                    <div id="reporte-contenido">
+                        <div className="score-hero" style={{ background: results.level.color }}>
+                            <div className="subtitle">Reporte de Madurez Digital para: **{companyInfo.name}**</div>
+                            <h1 className="score-value">{formattedScore}<span style={{ fontSize: '2rem', fontWeight: 500 }}>%</span></h1>
+                            <div className="score-label">Puntuación de Madurez General</div>
+                            <div className="level-badge" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}>{results.level.name}</div>
+                            <div style={{ marginTop: '20px', fontSize: '1.05rem', opacity: 0.9 }}>
+                                {results.level.desc}
+                            </div>
                         </div>
-                    </div>
 
-                    <RadarChart results={results} />
+                        <RadarChart results={results} />
 
-                    <div className="dimensions-grid">
-                        {Object.keys(results.dimensions).map(dimKey => {
-                            const dimResult = results.dimensions[dimKey];
-                            const dimData = questionsData[dimKey];
-                            const dimScore = dimResult.percentage.toFixed(1);
+                        <div className="dimensions-grid">
+                            {Object.keys(results.dimensions).map(dimKey => {
+                                const dimResult = results.dimensions[dimKey];
+                                const dimData = questionsData[dimKey];
+                                const dimScore = dimResult.percentage.toFixed(1);
 
-                            return (
-                                <div key={dimKey} className="dimension-result-card">
-                                    <h3>{dimData.icon} {dimData.title}</h3>
-                                    <div className="dimension-score">{dimScore}%</div>
-                                    <div className="dimension-bar">
-                                        <div className="dimension-bar-fill" style={{ width: `${dimScore}%` }}></div>
+                                return (
+                                    <div key={dimKey} className="dimension-result-card">
+                                        <h3>{dimData.icon} {dimData.title}</h3>
+                                        <div className="dimension-score">{dimScore}%</div>
+                                        <div className="dimension-bar">
+                                            <div className="dimension-bar-fill" style={{ width: `${dimScore}%` }}></div>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    
-                    <div className="roadmap-section">
-                        <h3>{results.level.level < 5 ? "Próximos Pasos Recomendados" : "Excelencia Continua"}</h3>
-                        <p style={{ marginBottom: '30px', color: '#065f46', fontWeight: 500 }}>
-                            Basado en tu nivel de madurez **{results.level.name}**, este es el *roadmap* sugerido para avanzar al siguiente nivel:
-                        </p>
-                        <div className="roadmap-steps">
-                            {roadmapSteps.map((step, index) => (
-                                <div key={index} className="roadmap-step">
-                                    <div className="roadmap-step-number">Paso {step.step}</div>
-                                    <h4>{step.title}</h4>
-                                    <p>{step.desc}</p>
-                                    <ul>
-                                        {step.actions.map((action, i) => <li key={i}>{action}</li>)}
-                                    </ul>
-                                </div>
-                            ))}
+                                );
+                            })}
+                        </div>
+                        
+                        <div className="roadmap-section">
+                            <h3>{results.level.level < 5 ? "Próximos Pasos Recomendados" : "Excelencia Continua"}</h3>
+                            <p style={{ marginBottom: '30px', color: '#065f46', fontWeight: 500 }}>
+                                Basado en tu nivel de madurez **{results.level.name}**, este es el *roadmap* sugerido para avanzar al siguiente nivel:
+                            </p>
+                            <div className="roadmap-steps">
+                                {roadmapSteps.map((step, index) => (
+                                    <div key={index} className="roadmap-step">
+                                        <div className="roadmap-step-number">Paso {step.step}</div>
+                                        <h4>{step.title}</h4>
+                                        <p>{step.desc}</p>
+                                        <ul>
+                                            {step.actions.map((action, i) => <li key={i}>{action}</li>)}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
-
+                    {/* Botones FUERA del contenedor de reporte */}
                     <div className="action-buttons">
                         <button className="btn btn-secondary" onClick={() => window.print()}>
                             🖨️ Imprimir Reporte
                         </button>
                         <button className="btn btn-primary" onClick={handleDownload}>
-                            💾 Exportar PDF (Simulado)
+                            💾 Exportar PDF
                         </button>
                         <button className="btn btn-primary" onClick={() => {
                              if(window.confirm('¿Estás seguro de que quieres reiniciar la evaluación? Todos los datos guardados se perderán.')){
@@ -571,14 +588,21 @@
         const App = () => {
             const [screen, setScreen] = useState('welcome');
             const [currentDim, setCurrentDim] = useState('D1');
-            const [answers, setAnswers] = useState({});
-            const [companyInfo, setCompanyInfo] = useState(() => {
+            const [answers, setAnswers] = useState(() => {
                 const saved = localStorage.getItem('maturityData');
                 if (saved) {
-                    const data = JSON.parse(saved);
-                    return data.companyInfo || { name: '', date: new Date().toISOString().split('T')[0], evaluator: '' };
+                    return JSON.parse(saved).answers || {};
                 }
-                return { name: '', date: new Date().toISOString().split('T')[0], evaluator: '' };
+                return {};
+            });
+            const [companyInfo, setCompanyInfo] = useState(() => {
+                const saved = localStorage.getItem('maturityData');
+                const defaultDate = new Date().toISOString().split('T')[0];
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    return data.companyInfo || { name: '', date: defaultDate, evaluator: '' };
+                }
+                return { name: '', date: defaultDate, evaluator: '' };
             });
             
             // --- Handlers y Cálculos definidos con useCallback para estabilidad ---
