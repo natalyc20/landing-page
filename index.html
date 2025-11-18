@@ -487,34 +487,30 @@
             );
         };
 
-      // ⚠️ NOTA: Asegúrate de que las funciones 'getLevel' y la constante 'questionsData' estén definidas y accesibles
-// en el ámbito donde se encuentra 'ResultsScreen'. (No están en el código que me proporcionaste, pero son necesarias).
-
-const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
-    // 1. Definición de variables y obtención de datos
+     const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
     const roadmapSteps = getRoadmap(results.level);
     const formattedScore = results.normalizedScore.toFixed(1);
 
-    // 🛑 FUNCIÓN IMPLEMENTADA PARA DESCARGA DE PDF
+    // 🛑 FUNCIÓN CORREGIDA PARA DESCARGA DE PDF
     const handleDownload = () => {
         const element = document.getElementById('reporte-contenido');
 
-        // 💡 OPTIMIZACIÓN: Añadir un pequeño retraso para que los gráficos (canvas) se terminen de renderizar
+        // 💡 OPTIMIZACIÓN CRÍTICA: Añadir un retraso de 1 segundo (1000ms). 
+        // Esto le da tiempo al RadarChart para renderizar completamente su canvas.
         setTimeout(() => {
             // Opciones de configuración para html2pdf
             const options = {
                 margin: 10,
-                // Usar || 'Empresa' para evitar un nombre de archivo roto si companyInfo.name es nulo
-                filename: `Reporte-Madurez-Digital-${companyInfo.name || 'Empresa'}.pdf`, 
+                filename: `Reporte-Madurez-Digital-${companyInfo.name || 'Empresa'}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                // Escala 3 recomendada para gráficos de alta calidad en PDF
-                html2canvas: { scale: 3, logging: true, useCORS: true }, 
+                // 📈 Aumentar la escala a 3 o 4 para gráficos de alta resolución
+                html2canvas: { scale: 3, logging: true, useCORS: true, allowTaint: true }, 
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             // html2pdf genera y descarga el archivo
             html2pdf().set(options).from(element).save();
-        }, 500); // Espera de 500ms
+        }, 1000); // 1 segundo de espera
     };
 
     return (
@@ -531,15 +527,13 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
                     </div>
                 </div>
 
-                {/* Componente del gráfico */}
-                <RadarChart results={results} /> 
+                <RadarChart results={results} />
 
                 <div className="dimensions-grid">
                     {/* Map de dimensiones: Asume que questionsData es accesible */}
                     {Object.keys(results.dimensions).map(dimKey => {
                         const dimResult = results.dimensions[dimKey];
-                        // ⚠️ CORRECCIÓN: Verifica que 'questionsData' exista y tenga la clave. 
-                        // Si no, esto podría fallar. (Asumimos que sí existe)
+                        // ⚠️ Usar un fallback seguro por si 'questionsData' no está definido globalmente
                         const dimData = window.questionsData?.[dimKey] || { title: 'Dimensión Desconocida', icon: '❓' }; 
                         const dimScore = dimResult.percentage.toFixed(1);
 
@@ -563,11 +557,12 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
                     <div className="roadmap-steps">
                         {roadmapSteps.map((step, index) => (
                             <div key={index} className="roadmap-step">
-                                <div className="roadmap-step-number">Paso {index + 1}</div> {/* Usar index + 1 o el valor correcto de step */}
+                                {/* Usar index + 1 como número de paso si 'step.step' no es fiable */}
+                                <div className="roadmap-step-number">Paso {index + 1}</div> 
                                 <h4>{step.title}</h4>
                                 <p>{step.desc}</p>
                                 <ul>
-                                    {/* ⚠️ CORRECCIÓN: Usar step.actions.map si actions es un array. */}
+                                    {/* Mapeo seguro de acciones */}
                                     {step.actions && step.actions.map((action, i) => <li key={i}>{action}</li>)} 
                                 </ul>
                             </div>
@@ -584,7 +579,6 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
                     💾 Exportar PDF
                 </button>
                 <button className="btn btn-primary" onClick={() => {
-                    // Lógica para reiniciar, mejor moverla a una función separada (resetApp) y pasarla como prop.
                      if(window.confirm('¿Estás seguro de que quieres reiniciar la evaluación? Todos los datos guardados se perderán.')){
                         localStorage.removeItem('maturityData');
                         setScreen('welcome');
