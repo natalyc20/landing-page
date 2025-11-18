@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evaluación de Madurez Digital - Versión Ejecutiva</title>
-
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
@@ -108,12 +106,8 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback } = React;
         const Chart = window.Chart;
-        const html2pdf = window.html2pdf;
-        
-        // ====================================================================
-        // I. CUESTIONARIO Y DATOS BASE
-        // ====================================================================
 
+        // Cuestionario y Datos (Mantenidos intactos)
         const questionsData = {
             "D1": {
                 title: "Estrategia y Liderazgo Digital",
@@ -209,9 +203,7 @@
             { value: 5, label: "5", desc: "Óptimo" }
         ];
 
-        // ====================================================================
-        // II. LÓGICA DE CÁLCULO Y UTILIDADES
-        // ====================================================================
+        // --- Funciones de Lógica y Cálculo (Mantenidos sin cambios) ---
 
         const getLevel = (score) => {
             if (score < 20) return { level: 0, name: "Nivel 0: Inicial", color: "#dc2626", desc: "Sin estrategia digital, procesos manuales" };
@@ -257,40 +249,8 @@
             };
             return roadmaps[level.level] || roadmaps[0];
         };
-
-        const calculateResults = (answers) => {
-            const dimResults = {};
-            let totalScore = 0;
-            let totalPossibleScore = 0;
-
-            Object.keys(answers).forEach(dim => {
-                const dimAnswers = answers[dim];
-                const dimSum = dimAnswers.reduce((sum, val) => sum + (val || 0), 0);
-                const maxDimScore = dimAnswers.length * 5;
-                const dimPercentage = maxDimScore > 0 ? (dimSum / maxDimScore) * 100 : 0;
-
-                dimResults[dim] = {
-                    score: dimSum,
-                    percentage: parseFloat(dimPercentage.toFixed(1)),
-                    maxScore: maxDimScore,
-                    title: questionsData[dim].title,
-                    icon: questionsData[dim].icon
-                };
-
-                totalScore += dimSum;
-                totalPossibleScore += maxDimScore;
-            });
-
-            const overallPercentage = totalPossibleScore > 0 ? (totalScore / totalPossibleScore) * 100 : 0;
-            const overallScore = parseFloat(overallPercentage.toFixed(1));
-            const levelData = getLevel(overallScore);
-
-            return { overallScore, levelData, dimResults };
-        };
-
-        // ====================================================================
-        // III. COMPONENTES (VIEWS)
-        // ====================================================================
+        
+        // --- Componentes ---
 
         const QuestionCard = ({ dim, qIndex, questionText, currentAnswer, handleAnswer }) => (
             <div className={`question-card ${currentAnswer !== undefined ? 'answered' : ''}`}>
@@ -318,7 +278,7 @@
             </div>
         );
 
-        const WelcomeScreen = ({ onStart, companyInfo, setCompanyInfo }) => {
+        const WelcomeScreen = ({ onStart, companyInfo, setCompanyInfo, setCurrentDim }) => {
             const isFormComplete = companyInfo.name && companyInfo.evaluator;
 
             return (
@@ -361,335 +321,479 @@
                             onChange={(e) => setCompanyInfo({ ...companyInfo, evaluator: e.target.value })}
                         />
                     </div>
-                    <div style={{ textAlign: 'center', marginTop: '30px' }}>
-                        <button className="btn btn-primary" onClick={onStart} disabled={!isFormComplete}>
-                            Comenzar Evaluación
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        const ResultsScreen = ({ results, companyInfo, startNew }) => {
-            const chartRef = useRef(null);
-            const radarChart = useRef(null);
-            const { overallScore, levelData, dimResults } = results;
-
-            useEffect(() => {
-                // Destruir el chart existente antes de crear uno nuevo
-                if (radarChart.current) {
-                    radarChart.current.destroy();
-                }
-
-                // Preparar datos para el gráfico
-                const labels = Object.values(dimResults).map(d => d.title.split(' ')[0]);
-                const dataValues = Object.values(dimResults).map(d => d.percentage);
-
-                if (chartRef.current) {
-                    const ctx = chartRef.current.getContext('2d');
-                    radarChart.current = new Chart(ctx, {
-                        type: 'radar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Puntuación (%)',
-                                data: dataValues,
-                                backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                                borderColor: '#3b82f6',
-                                pointBackgroundColor: '#8b5cf6',
-                                pointBorderColor: '#fff',
-                                pointHoverBackgroundColor: '#fff',
-                                pointHoverBorderColor: '#8b5cf6',
-                                borderWidth: 2,
-                                tension: 0.1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: true,
-                            scales: {
-                                r: {
-                                    angleLines: { color: '#e2e8f0' },
-                                    grid: { color: '#e2e8f0' },
-                                    pointLabels: { font: { size: 14, weight: 'bold' }, color: '#1e293b' },
-                                    suggestedMin: 0,
-                                    suggestedMax: 100,
-                                    ticks: { stepSize: 20, backdropColor: 'rgba(255, 255, 255, 0.8)' }
-                                }
-                            },
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.parsed.r}%` } }
-                            }
-                        }
-                    });
-                }
-
-
-                return () => {
-                    if (radarChart.current) {
-                        radarChart.current.destroy();
-                    }
-                };
-            }, [dimResults]);
-
-            const handleDownloadPDF = () => {
-                const element = document.getElementById('report-content');
-                
-                // Ocultar botones de navegación antes de la descarga
-                const nav = document.querySelector('.navigation');
-                if(nav) nav.style.display = 'none';
-
-                html2pdf(element, {
-                    margin: 10,
-                    filename: `Reporte_Madurez_Digital_${companyInfo.name || 'Empresa'}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, logging: true, dpi: 192, letterRendering: true },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                }).then(() => {
-                    // Restaurar botones después de la descarga
-                    if(nav) nav.style.display = 'flex';
-                });
-            };
-
-            const roadmap = getRoadmap(levelData);
-
-            return (
-                <div id="results-content">
-                    <div className="score-hero" style={{ backgroundColor: levelData.color }}>
-                        <div className="score-label">Puntuación de Madurez General para: **{companyInfo.name || "Empresa"}**</div>
-                        <div className="score-value">{overallScore}%</div>
-                        <div className="level-badge">{levelData.name}</div>
-                        <p className="subtitle" style={{ marginTop: '10px' }}>{levelData.desc}</p>
-                    </div>
-
-                    <div className="chart-container">
-                        <h3>Análisis de Madurez por Dimensión</h3>
-                        <canvas ref={chartRef}></canvas>
-                    </div>
-
-                    <div className="dimensions-grid">
-                        {Object.keys(dimResults).map(dimKey => {
-                            const dim = dimResults[dimKey];
-                            return (
-                                <div key={dimKey} className="dimension-result-card">
-                                    <h3>{dim.icon} {dim.title}</h3>
-                                    <div className="dimension-score">{dim.percentage}%</div>
-                                    <p>Max. Puntuación: {dim.maxScore} pts</p>
-                                    <div className="dimension-bar">
-                                        <div className="dimension-bar-fill" style={{ width: `${dim.percentage}%` }}></div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    <div className="roadmap-section">
-                        <h3>{levelData.level < 5 ? "Ruta de Transformación Digital Recomendada" : "Hoja de Ruta de Excelencia Continua"}</h3>
-                        <p>Basado en tu **{levelData.name}** ({overallScore}%), estas son las acciones prioritarias para avanzar al siguiente nivel de madurez.</p>
-                        <div className="roadmap-steps">
-                            {roadmap.map((stepData) => (
-                                <div key={stepData.step} className="roadmap-step">
-                                    <div className="roadmap-step-number">{stepData.step}</div>
-                                    <h4>{stepData.title}</h4>
-                                    <p>{stepData.desc}</p>
-                                    <ul>
-                                        {stepData.actions.map((action, index) => (
-                                            <li key={index}>{action}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="action-buttons">
-                        <button className="btn btn-primary" onClick={handleDownloadPDF}>
-                            Descargar Reporte PDF
-                        </button>
-                        <button className="btn btn-secondary" onClick={startNew}>
-                            Reiniciar Evaluación
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        // ====================================================================
-        // IV. COMPONENTE PRINCIPAL (MadurezDigitalAgro)
-        // ====================================================================
-
-        const MadurezDigitalAgro = () => {
-            const dimKeys = Object.keys(questionsData);
-            const totalDimensions = dimKeys.length;
-            
-            // Estado para el flujo (0: Inicio, 1-6: Dimensiones, 7: Resultados)
-            const [currentStep, setCurrentStep] = useState(0); 
-            
-            // Estado para las respuestas (cargado desde localStorage si existe)
-            const [answers, setAnswers] = useState(() => {
-                try {
-                    const storedAnswers = localStorage.getItem('madurezDigitalAnswers');
-                    if (storedAnswers) return JSON.parse(storedAnswers);
-                } catch (e) {
-                    console.error("Error al cargar respuestas:", e);
-                }
-                const initialAnswers = {};
-                dimKeys.forEach(dim => {
-                    initialAnswers[dim] = Array(questionsData[dim].questions.length).fill(undefined);
-                });
-                return initialAnswers;
-            });
-
-            // Estado para la información de la empresa (cargado desde localStorage)
-            const [companyInfo, setCompanyInfo] = useState(() => {
-                try {
-                    const storedInfo = localStorage.getItem('madurezDigitalCompanyInfo');
-                    if (storedInfo) return JSON.parse(storedInfo);
-                } catch (e) {
-                    console.error("Error al cargar info de empresa:", e);
-                }
-                return { name: '', evaluator: '' };
-            });
-
-            // Persistir respuestas y compañía en localStorage
-            useEffect(() => {
-                localStorage.setItem('madurezDigitalAnswers', JSON.stringify(answers));
-            }, [answers]);
-            
-            useEffect(() => {
-                localStorage.setItem('madurezDigitalCompanyInfo', JSON.stringify(companyInfo));
-            }, [companyInfo]);
-
-            const currentDimKey = dimKeys[currentStep - 1];
-            const currentDimData = currentDimKey ? questionsData[currentDimKey] : null;
-            
-            const totalQuestions = Object.values(questionsData).reduce((sum, dim) => sum + dim.questions.length, 0);
-            const answeredQuestionsCount = Object.values(answers).flat().filter(a => a !== undefined).length;
-            const overallProgress = Math.round((answeredQuestionsCount / totalQuestions) * 100);
-
-            const handleAnswer = useCallback((dim, qIndex, value) => {
-                setAnswers(prev => {
-                    const newDimAnswers = [...prev[dim]];
-                    newDimAnswers[qIndex] = value;
-                    return { ...prev, [dim]: newDimAnswers };
-                });
-            }, []);
-
-            const isCurrentDimComplete = currentDimKey && answers[currentDimKey].every(a => a !== undefined);
-
-            const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, totalDimensions + 1));
-            const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
-            
-            const results = calculateResults(answers);
-
-            // Renderizado del contenido central
-            const renderContent = () => {
-                if (currentStep === 0) {
-                    return <WelcomeScreen onStart={nextStep} companyInfo={companyInfo} setCompanyInfo={setCompanyInfo} />;
-                }
-                if (currentStep <= totalDimensions) {
-                    return (
-                        <>
-                            <div className="dimension-header">
-                                <h2>{currentDimData.icon} {currentDimData.title}</h2>
-                                <p>{currentDimData.description}</p>
-                            </div>
-                            <div className="scale-reference">
-                                <h4>Escala de Madurez</h4>
-                                <div className="scale-items">
-                                    {ratingScale.map((scale) => (
-                                        <div key={scale.value} className="scale-item">
-                                            <span className="scale-item-number">{scale.label}</span>
-                                            {scale.desc}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            {currentDimData.questions.map((qText, qIndex) => (
-                                <QuestionCard
-                                    key={qIndex}
-                                    dim={currentDimKey}
-                                    qIndex={qIndex}
-                                    questionText={qText}
-                                    currentAnswer={answers[currentDimKey][qIndex]}
-                                    handleAnswer={handleAnswer}
-                                />
-                            ))}
-                        </>
-                    );
-                }
-                if (currentStep === totalDimensions + 1) {
-                    // Pantalla de Resultados
-                    return <ResultsScreen results={results} companyInfo={companyInfo} startNew={() => setCurrentStep(0)} />;
-                }
-                return null; // En caso de estado inesperado
-            };
-
-            return (
-                <div className="app-container" id="report-content">
-                    <div className="header">
-                        <h1>Madurez Digital Agro/Inmobiliario</h1>
-                        <p className="subtitle">{companyInfo.name || "Empresa Sin Nombre"}</p>
-                        <span className="badge">Evaluador: {companyInfo.evaluator || "Anónimo"}</span>
-                    </div>
-
-                    <div className="progress-section">
-                        <div className="progress-bar-container">
-                            <div 
-                                className="progress-bar-fill" 
-                                style={{ width: `${overallProgress}%` }}
-                            ></div>
-                        </div>
-                        <div className="progress-text">
-                            {currentStep > 0 && currentStep <= totalDimensions
-                                ? `Dimensión ${currentStep} de ${totalDimensions}: ${currentDimData.title}`
-                                : currentStep === totalDimensions + 1
-                                ? `¡Evaluación Finalizada! (${overallProgress}% Completado)`
-                                : `Comenzar Evaluación (${overallProgress}% Completado)`
-                            }
-                        </div>
+                    <div className="form-group">
+                        <label className="form-label">Fecha de Evaluación</label>
+                        <input
+                            className="form-input"
+                            type="date"
+                            value={companyInfo.date}
+                            onChange={(e) => setCompanyInfo({ ...companyInfo, date: e.target.value })}
+                        />
                     </div>
                     
-                    <div className="content">
-                        {renderContent()}
+                    <div style={{ textAlign: 'center', marginTop: '30px' }}>
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => { setCurrentDim('D1'); onStart(); }}
+                            disabled={!isFormComplete}
+                        >
+                            Iniciar Evaluación (Comenzar con D1)
+                        </button>
+                    </div>
+                </div>
+            );
+        };
 
-                        <div className="navigation" style={{ justifyContent: currentStep <= 0 ? 'center' : 'space-between' }}>
-                            {currentStep > 1 && currentStep <= totalDimensions && (
-                                <button className="btn btn-secondary" onClick={prevStep}>
-                                    &larr; Anterior
-                                </button>
-                            )}
-                            
-                            {currentStep > 0 && currentStep <= totalDimensions && (
-                                <button
-                                    className={`btn ${currentStep < totalDimensions ? 'btn-primary' : 'btn-success'}`}
-                                    onClick={nextStep}
-                                    disabled={!isCurrentDimComplete}
-                                >
-                                    {currentStep < totalDimensions ? `Siguiente Dimensión (${currentStep}/${totalDimensions}) \u2192` : 'Ver Resultados \u2192'}
-                                </button>
-                            )}
-                            {currentStep === totalDimensions + 1 && (
-                                <button className="btn btn-secondary" onClick={() => setCurrentStep(0)}>
-                                    &larr; Volver a Inicio
-                                </button>
-                            )}
+        const FormScreen = ({ currentDim, setCurrentDim, answers, handleAnswer, setScreen, getProgress }) => {
+            const dimensionsKeys = Object.keys(questionsData);
+            const currentDimIndex = dimensionsKeys.indexOf(currentDim);
+            const currentQuestions = questionsData[currentDim];
+            const totalDims = dimensionsKeys.length;
+            const nextDimKey = dimensionsKeys[currentDimIndex + 1];
+            const prevDimKey = dimensionsKeys[currentDimIndex - 1];
+
+            const currentAnswersCount = Object.keys(answers[currentDim] || {}).length;
+            const isCurrentDimComplete = currentQuestions.questions.length === currentAnswersCount;
+            const isLastDim = currentDimIndex === totalDims - 1;
+
+            return (
+                <div className="content">
+                    <div className="dimension-header">
+                        <h2>{currentQuestions.icon} {currentQuestions.title}</h2>
+                        <p>{currentQuestions.description}</p>
+                    </div>
+
+                    <div className="scale-reference">
+                        <h4>Escala de Puntuación (0 a 5)</h4>
+                        <div className="scale-items">
+                            {ratingScale.map(scale => (
+                                <div key={scale.value} className="scale-item">
+                                    <div className="scale-item-number">{scale.label}</div>
+                                    <span>{scale.desc}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
+
+                    {currentQuestions.questions.map((qText, qIndex) => (
+                        <QuestionCard
+                            key={qIndex}
+                            dim={currentDim}
+                            qIndex={qIndex}
+                            questionText={qText}
+                            currentAnswer={answers[currentDim] ? answers[currentDim][qIndex] : undefined}
+                            handleAnswer={handleAnswer}
+                        />
+                    ))}
+
+                    <div className="navigation">
+                        {prevDimKey && (
+                            <button 
+                                className="btn btn-secondary" 
+                                onClick={() => setCurrentDim(prevDimKey)}
+                            >
+                                ← Anterior: {questionsData[prevDimKey].title}
+                            </button>
+                        )}
+
+                        {!isLastDim && (
+                            <button 
+                                className="btn btn-primary" 
+                                onClick={() => setCurrentDim(nextDimKey)}
+                                disabled={!isCurrentDimComplete}
+                            >
+                                Siguiente: {questionsData[nextDimKey].title} →
+                            </button>
+                        )}
+
+                        {isLastDim && (
+                            <button 
+                                className="btn btn-success" 
+                                onClick={() => getProgress() === 100 ? setScreen('results') : alert('Asegúrate de responder todas las preguntas.')}
+                                disabled={!isCurrentDimComplete}
+                            >
+                                Finalizar y Ver Resultados
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const RadarChart = ({ results }) => {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+            
+            // Función drawChart ahora local y estable
+            const drawChart = useCallback(() => {
+                const dimLabels = Object.keys(results.dimensions).map(key => questionsData[key].title.split(' ')[0]); // Usar solo la primera palabra para el radar
+                const dataValues = Object.keys(results.dimensions).map(key => results.dimensions[key].percentage);
+
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
+
+                if (!chartRef.current || dataValues.length === 0) return;
+
+                const ctx = chartRef.current.getContext('2d');
+                chartInstance.current = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: dimLabels,
+                        datasets: [{
+                            label: 'Puntuación % de Madurez',
+                            data: dataValues,
+                            backgroundColor: 'rgba(59, 130, 246, 0.4)',
+                            borderColor: '#3b82f6',
+                            pointBackgroundColor: '#3b82f6',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#3b82f6',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)}%` } }
+                        },
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                suggestedMin: 0,
+                                suggestedMax: 100,
+                                pointLabels: { font: { size: 14, weight: '600' }, color: '#1e293b' },
+                                ticks: { stepSize: 20, callback: (value) => `${value}%` }
+                            }
+                        }
+                    }
+                });
+            }, [results]); // Ahora solo depende de 'results' (la data que cambia)
+
+            useEffect(() => {
+                drawChart();
+            }, [drawChart]); // Se ejecuta cuando la función drawChart cambia (lo cual solo sucede si results cambia)
+
+            return (
+                <div className="chart-container">
+                    <h3>Análisis de Madurez por Dimensión</h3>
+                    <div style={{ height: '400px' }}>
+                        <canvas ref={chartRef}></canvas>
+                    </div>
+                </div>
+            );
+        };
+
+const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
+    // Definiciones de variables y datos
+    const roadmapSteps = getRoadmap(results.level);
+    const formattedScore = results.normalizedScore.toFixed(1);
+
+    // 🛑 FUNCIÓN CON AJUSTE EXTREMO PARA ELIMINAR ESPACIOS EN BLANCO
+    const handleDownload = () => {
+        const element = document.getElementById('reporte-contenido');
+        const mainContentWrapper = document.querySelector('.content'); // Selector del contenedor padre/global
+
+        // 💥 GUARDAR ESTILOS ORIGINALES
+        const originalMaxHeight = element.style.maxHeight;
+        const originalOverflow = element.style.overflow;
+        
+        // Asumiendo que el contenedor global tiene un padding/margin superior que crea páginas en blanco
+        const originalContentStyle = mainContentWrapper ? mainContentWrapper.style.cssText : '';
+        if (mainContentWrapper) {
+            mainContentWrapper.style.cssText = 'padding: 0 !important; margin: 0 !important;';
+        }
+
+        // 🚨 AJUSTE DE ALTURA CRÍTICO
+        element.style.maxHeight = 'none'; 
+        element.style.overflow = 'visible'; 
+        // 💡 Intentar mover el contenido hacia arriba para eliminar páginas vacías (ej: -200px)
+        element.style.marginTop = '-50px'; // Ajusta este valor si persiste la página en blanco
+
+        // 1. INYECTAR ESTILOS DE IMPRESIÓN
+        const style = document.createElement('style');
+        style.id = 'pdf-temp-styles';
+        style.textContent = `
+            /* Elimina margen/padding en los contenedores raíz */
+            html, body, .content {
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important; 
+            }
+
+            /* Fija un ancho seguro y reinicia el box-model */
+            #reporte-contenido {
+                width: 760px !important; 
+                max-width: 100% !important;
+                padding: 15px !important; 
+                box-sizing: border-box !important;
+            }
+
+            /* FUERZA a que los bloques de contenido importante no se corten */
+            .dimension-result-card, 
+            .roadmap-step,
+            .roadmap-section, 
+            .score-hero {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important; 
+            }
+            
+            .score-hero {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // El setTimeout es crítico para el gráfico (RadarChart)
+        setTimeout(() => { 
+            const options = {
+                margin: 10, 
+                filename: `Reporte-Madurez-Digital-${companyInfo.name || 'Empresa'}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    // 💡 AJUSTE DE ESCALA: Reducir a 1 (o 1.5) puede evitar errores de corte por renderizado
+                    scale: 1.5, 
+                    logging: true, 
+                    useCORS: true, 
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // 2. Generar el PDF y encadenar la promesa para la limpieza
+            html2pdf().set(options).from(element).save().then(() => {
+                // 3. LIMPIEZA: Restaurar estilos y eliminar CSS temporal
+                const tempStyles = document.getElementById('pdf-temp-styles');
+                if (tempStyles) {
+                    document.head.removeChild(tempStyles);
+                }
+                
+                // ✅ RESTAURAR ESTILOS ORIGINALES
+                element.style.maxHeight = originalMaxHeight;
+                element.style.overflow = originalOverflow;
+                element.style.marginTop = ''; // Eliminar el margen negativo
+                
+                if (mainContentWrapper) {
+                    mainContentWrapper.style.cssText = originalContentStyle;
+                }
+            });
+        }, 1000); 
+    };
+
+
+    return (
+        <div className="content">
+            {/* 🛑 Contenedor del reporte para la descarga */}
+            <div id="reporte-contenido">
+                <div className="score-hero" style={{ background: results.level.color }}>
+                    <div className="subtitle">Reporte de Madurez Digital para: **{companyInfo.name}**</div>
+                    <h1 className="score-value">{formattedScore}<span style={{ fontSize: '2rem', fontWeight: 500 }}>%</span></h1>
+                    <div className="score-label">Puntuación de Madurez General</div>
+                    <div className="level-badge" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}>{results.level.name}</div>
+                    <div style={{ marginTop: '20px', fontSize: '1.05rem', opacity: 0.9 }}>
+                        {results.level.desc}
+                    </div>
+                </div>
+
+                <RadarChart results={results} />
+
+                <div className="dimensions-grid">
+                    {/* Map de dimensiones: Asume que questionsData es accesible */}
+                    {Object.keys(results.dimensions).map(dimKey => {
+                        const dimResult = results.dimensions[dimKey];
+                        const dimData = window.questionsData?.[dimKey] || { title: 'Dimensión Desconocida', icon: '❓' }; 
+                        const dimScore = dimResult.percentage.toFixed(1);
+
+                        return (
+                            <div key={dimKey} className="dimension-result-card">
+                                <h3>{dimData.icon} {dimData.title}</h3>
+                                <div className="dimension-score">{dimScore}%</div>
+                                <div className="dimension-bar">
+                                    <div className="dimension-bar-fill" style={{ width: `${dimScore}%` }}></div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+                
+                <div className="roadmap-section">
+                    <h3>{results.level.level < 5 ? "Próximos Pasos Recomendados" : "Excelencia Continua"}</h3>
+                    <p style={{ marginBottom: '30px', color: '#065f46', fontWeight: 500 }}>
+                        Basado en tu nivel de madurez **{results.level.name}**, este es el *roadmap* sugerido para avanzar al siguiente nivel:
+                    </p>
+                    <div className="roadmap-steps">
+                        {roadmapSteps.map((step, index) => (
+                            <div key={index} className="roadmap-step">
+                                <div className="roadmap-step-number">Paso {index + 1}</div> 
+                                <h4>{step.title}</h4>
+                                <p>{step.desc}</p>
+                                <ul>
+                                    {step.actions && step.actions.map((action, i) => <li key={i}>{action}</li>)} 
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            {/* Botones FUERA del contenedor de reporte */}
+            <div className="action-buttons">
+                <button className="btn btn-secondary" onClick={() => window.print()}>
+                    🖨️ Imprimir Reporte
+                </button>
+                <button className="btn btn-primary" onClick={handleDownload}>
+                    💾 Exportar PDF
+                </button>
+                <button className="btn btn-primary" onClick={() => {
+                     if(window.confirm('¿Estás seguro de que quieres reiniciar la evaluación? Todos los datos guardados se perderán.')){
+                        localStorage.removeItem('maturityData');
+                        setScreen('welcome');
+                        window.location.reload();
+                     }
+                }}>
+                    🔄 Reiniciar Evaluación
+                </button>
+            </div>
+        </div>
+    );
+};
+        // --- COMPONENTE PRINCIPAL (App) ---
+
+        const App = () => {
+            const [screen, setScreen] = useState('welcome');
+            const [currentDim, setCurrentDim] = useState('D1');
+            const [answers, setAnswers] = useState(() => {
+                const saved = localStorage.getItem('maturityData');
+                if (saved) {
+                    return JSON.parse(saved).answers || {};
+                }
+                return {};
+            });
+            const [companyInfo, setCompanyInfo] = useState(() => {
+                const saved = localStorage.getItem('maturityData');
+                const defaultDate = new Date().toISOString().split('T')[0];
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    return data.companyInfo || { name: '', date: defaultDate, evaluator: '' };
+                }
+                return { name: '', date: defaultDate, evaluator: '' };
+            });
+            
+            // --- Handlers y Cálculos definidos con useCallback para estabilidad ---
+            
+            // CORREGIDO: handleAnswer es estable
+            const handleAnswer = useCallback((dim, idx, val) => {
+                setAnswers(prev => ({
+                    ...prev,
+                    [dim]: { ...(prev[dim] || {}), [idx]: val }
+                }));
+            }, []);
+
+            // calculateResults es estable
+            const calculateResults = useCallback(() => {
+                const results = {};
+                let totalScore = 0;
+                let maxScore = 0;
+
+                Object.keys(questionsData).forEach(dim => {
+                    const dimAnswers = answers[dim] || {};
+                    const score = Object.values(dimAnswers).reduce((sum, val) => sum + val, 0);
+                    const max = questionsData[dim].questions.length * 5;
+                    
+                    results[dim] = {
+                        score,
+                        maxScore: max,
+                        percentage: max > 0 ? (score / max) * 100 : 0
+                    };
+                    
+                    totalScore += score;
+                    maxScore += max;
+                });
+
+                const normalizedScore = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
+                const level = getLevel(normalizedScore);
+
+                return { dimensions: results, totalScore, maxScore, normalizedScore, level };
+            }, [answers]);
+
+            // getProgress es estable
+            const getProgress = useCallback(() => {
+                const total = Object.keys(questionsData).reduce((sum, dim) => 
+                    sum + questionsData[dim].questions.length, 0);
+                const answered = Object.keys(questionsData).reduce((sum, dim) => 
+                    sum + Object.keys(answers[dim] || {}).length, 0);
+                return (answered / total) * 100;
+            }, [answers]);
+
+            // Guardado (OK, solo depende de answers y companyInfo)
+            useEffect(() => {
+                localStorage.setItem('maturityData', JSON.stringify({ answers, companyInfo }));
+            }, [answers, companyInfo]);
+            
+            // --- Renderizado Condicional ---
+
+            let currentScreen = null;
+            const progress = getProgress();
+
+            if (screen === 'welcome') {
+                currentScreen = (
+                    <WelcomeScreen 
+                        onStart={() => setScreen('form')} 
+                        companyInfo={companyInfo} 
+                        setCompanyInfo={setCompanyInfo} 
+                        setCurrentDim={setCurrentDim}
+                    />
+                );
+            } else if (screen === 'form') {
+                currentScreen = (
+                    <>
+                        <div className="header">
+                            <h1 style={{fontSize: '1.6rem', marginBottom: '8px'}}>{companyInfo.name}</h1>
+                            <span className="subtitle">Evaluación en Curso: {questionsData[currentDim].title}</span>
+                            <div className="progress-section">
+                                <div className="progress-bar-container">
+                                    <div className="progress-bar-fill" style={{ width: `${progress.toFixed(1)}%` }}></div>
+                                </div>
+                                <div className="progress-text">Progreso General: {progress.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                        <FormScreen 
+                            currentDim={currentDim}
+                            setCurrentDim={setCurrentDim}
+                            answers={answers}
+                            handleAnswer={handleAnswer}
+                            setScreen={setScreen}
+                            getProgress={getProgress}
+                        />
+                    </>
+                );
+            } else if (screen === 'results') {
+                currentScreen = (
+                    <ResultsScreen 
+                        results={calculateResults()} 
+                        companyInfo={companyInfo} 
+                        getRoadmap={getRoadmap}
+                        setScreen={setScreen}
+                    />
+                );
+            }
+            
+            return (
+                <div className="app-container">
+                    {currentScreen}
                 </div>
             );
         };
         
-        // ====================================================================
-        // V. VINCULACIÓN FINAL (MONTAJE DE LA APLICACIÓN)
-        // ====================================================================
-
-        // Este es el punto final que vincula el componente principal (MadurezDigitalAgro)
-        // al div con id="root" en el cuerpo del HTML.
-        ReactDOM.createRoot(document.getElementById('root')).render(
-            <MadurezDigitalAgro />
-        );
+        // --- INICIALIZACIÓN DE REACT ---
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
 
     </script>
 </body>
