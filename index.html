@@ -103,10 +103,10 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback } = React; // Importar useCallback
-        const Chart = window.Chart; // Asegurar que Chart.js esté disponible
+        const { useState, useEffect, useRef, useCallback } = React;
+        const Chart = window.Chart;
 
-        // Cuestionario y Datos (Mantener intactos)
+        // Cuestionario y Datos (Mantenidos intactos)
         const questionsData = {
             "D1": {
                 title: "Estrategia y Liderazgo Digital",
@@ -202,45 +202,15 @@
             { value: 5, label: "5", desc: "Óptimo" }
         ];
 
-        // --- Funciones de Lógica y Cálculo ---
+        // --- Funciones de Lógica y Cálculo (Mantenidas sin cambios) ---
 
         const getLevel = (score) => {
-            if (score < 20) return { 
-                level: 0, 
-                name: "Nivel 0: Inicial", 
-                color: "#dc2626",
-                desc: "Sin estrategia digital, procesos manuales"
-            };
-            if (score < 40) return { 
-                level: 1, 
-                name: "Nivel 1: Emergente", 
-                color: "#ea580c",
-                desc: "Conciencia digital, iniciativas aisladas"
-            };
-            if (score < 60) return { 
-                level: 2, 
-                name: "Nivel 2: Definido", 
-                color: "#eab308",
-                desc: "Estrategia clara, herramientas implementadas"
-            };
-            if (score < 75) return { 
-                level: 3, 
-                name: "Nivel 3: Gestionado", 
-                color: "#3b82f6",
-                desc: "Procesos optimizados, cultura digital"
-            };
-            if (score < 90) return { 
-                level: 4, 
-                name: "Nivel 4: Optimizado", 
-                color: "#10b981",
-                desc: "Alta eficiencia, innovación continua"
-            };
-            return { 
-                level: 5, 
-                name: "Nivel 5: Exponencial", 
-                color: "#8b5cf6",
-                desc: "Digital-first, modelos disruptivos"
-            };
+            if (score < 20) return { level: 0, name: "Nivel 0: Inicial", color: "#dc2626", desc: "Sin estrategia digital, procesos manuales" };
+            if (score < 40) return { level: 1, name: "Nivel 1: Emergente", color: "#ea580c", desc: "Conciencia digital, iniciativas aisladas" };
+            if (score < 60) return { level: 2, name: "Nivel 2: Definido", color: "#eab308", desc: "Estrategia clara, herramientas implementadas" };
+            if (score < 75) return { level: 3, name: "Nivel 3: Gestionado", color: "#3b82f6", desc: "Procesos optimizados, cultura digital" };
+            if (score < 90) return { level: 4, name: "Nivel 4: Optimizado", color: "#10b981", desc: "Alta eficiencia, innovación continua" };
+            return { level: 5, name: "Nivel 5: Exponencial", color: "#8b5cf6", desc: "Digital-first, modelos disruptivos" };
         };
 
         const getRoadmap = (level) => {
@@ -381,7 +351,8 @@
             const nextDimKey = dimensionsKeys[currentDimIndex + 1];
             const prevDimKey = dimensionsKeys[currentDimIndex - 1];
 
-            const isCurrentDimComplete = currentQuestions.questions.length === Object.keys(answers[currentDim] || {}).length;
+            const currentAnswersCount = Object.keys(answers[currentDim] || {}).length;
+            const isCurrentDimComplete = currentQuestions.questions.length === currentAnswersCount;
             const isLastDim = currentDimIndex === totalDims - 1;
 
             return (
@@ -448,17 +419,75 @@
             );
         };
 
-        const ResultsScreen = ({ results, companyInfo, getRoadmap, drawChart, chartRef, setScreen }) => {
-            const roadmapSteps = getRoadmap(results.level);
+        const RadarChart = ({ results }) => {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
             
-            // Este useEffect ahora solo se ejecuta cuando results cambia.
-            // drawChart debe ser estable (definido con useCallback en App).
-            useEffect(() => {
-                if (results.normalizedScore > 0) {
-                    drawChart(results);
-                }
-            }, [results, drawChart]); 
+            // Función drawChart ahora local y estable
+            const drawChart = useCallback(() => {
+                const dimLabels = Object.keys(results.dimensions).map(key => questionsData[key].title.split(' ')[0]); // Usar solo la primera palabra para el radar
+                const dataValues = Object.keys(results.dimensions).map(key => results.dimensions[key].percentage);
 
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
+
+                if (!chartRef.current || dataValues.length === 0) return;
+
+                const ctx = chartRef.current.getContext('2d');
+                chartInstance.current = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: dimLabels,
+                        datasets: [{
+                            label: 'Puntuación % de Madurez',
+                            data: dataValues,
+                            backgroundColor: 'rgba(59, 130, 246, 0.4)',
+                            borderColor: '#3b82f6',
+                            pointBackgroundColor: '#3b82f6',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#3b82f6',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)}%` } }
+                        },
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                suggestedMin: 0,
+                                suggestedMax: 100,
+                                pointLabels: { font: { size: 14, weight: '600' }, color: '#1e293b' },
+                                ticks: { stepSize: 20, callback: (value) => `${value}%` }
+                            }
+                        }
+                    }
+                });
+            }, [results]); // Ahora solo depende de 'results' (la data que cambia)
+
+            useEffect(() => {
+                drawChart();
+            }, [drawChart]); // Se ejecuta cuando la función drawChart cambia (lo cual solo sucede si results cambia)
+
+            return (
+                <div className="chart-container">
+                    <h3>Análisis de Madurez por Dimensión</h3>
+                    <div style={{ height: '400px' }}>
+                        <canvas ref={chartRef}></canvas>
+                    </div>
+                </div>
+            );
+        };
+
+        const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
+            const roadmapSteps = getRoadmap(results.level);
             const formattedScore = results.normalizedScore.toFixed(1);
 
             const handleDownload = () => {
@@ -477,12 +506,7 @@
                         </div>
                     </div>
 
-                    <div className="chart-container">
-                        <h3>Análisis de Madurez por Dimensión</h3>
-                        <div style={{ height: '400px' }}>
-                            <canvas ref={chartRef}></canvas>
-                        </div>
-                    </div>
+                    <RadarChart results={results} />
 
                     <div className="dimensions-grid">
                         {Object.keys(results.dimensions).map(dimKey => {
@@ -528,7 +552,13 @@
                         <button className="btn btn-primary" onClick={handleDownload}>
                             💾 Exportar PDF (Simulado)
                         </button>
-                        <button className="btn btn-primary" onClick={() => setScreen('welcome')}>
+                        <button className="btn btn-primary" onClick={() => {
+                             if(window.confirm('¿Estás seguro de que quieres reiniciar la evaluación? Todos los datos guardados se perderán.')){
+                                localStorage.removeItem('maturityData');
+                                setScreen('welcome');
+                                window.location.reload();
+                             }
+                        }}>
                             🔄 Reiniciar Evaluación
                         </button>
                     </div>
@@ -550,26 +580,18 @@
                 }
                 return { name: '', date: new Date().toISOString().split('T')[0], evaluator: '' };
             });
-            const chartRef = useRef(null);
-            const chartInstance = useRef(null);
             
             // --- Handlers y Cálculos definidos con useCallback para estabilidad ---
             
+            // CORREGIDO: handleAnswer es estable
             const handleAnswer = useCallback((dim, idx, val) => {
                 setAnswers(prev => ({
                     ...prev,
                     [dim]: { ...(prev[dim] || {}), [idx]: val }
                 }));
-            }, []); // Sin dependencias (estable)
+            }, []);
 
-            const getProgress = useCallback(() => {
-                const total = Object.keys(questionsData).reduce((sum, dim) => 
-                    sum + questionsData[dim].questions.length, 0);
-                const answered = Object.keys(questionsData).reduce((sum, dim) => 
-                    sum + Object.keys(answers[dim] || {}).length, 0);
-                return (answered / total) * 100;
-            }, [answers]); // Depende solo de 'answers'
-
+            // calculateResults es estable
             const calculateResults = useCallback(() => {
                 const results = {};
                 let totalScore = 0;
@@ -594,68 +616,16 @@
                 const level = getLevel(normalizedScore);
 
                 return { dimensions: results, totalScore, maxScore, normalizedScore, level };
-            }, [answers]); // Depende solo de 'answers'
+            }, [answers]);
 
-            const drawChart = useCallback((results) => {
-                const dimLabels = Object.keys(results.dimensions).map(key => questionsData[key].title);
-                const dataValues = Object.keys(results.dimensions).map(key => results.dimensions[key].percentage);
-
-                if (chartInstance.current) {
-                    chartInstance.current.destroy();
-                }
-
-                if (!chartRef.current) return;
-
-                const ctx = chartRef.current.getContext('2d');
-                chartInstance.current = new Chart(ctx, {
-                    type: 'radar',
-                    data: {
-                        labels: dimLabels,
-                        datasets: [{
-                            label: 'Puntuación % de Madurez',
-                            data: dataValues,
-                            backgroundColor: 'rgba(59, 130, 246, 0.4)',
-                            borderColor: '#3b82f6',
-                            pointBackgroundColor: '#3b82f6',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: '#3b82f6',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)}%` } }
-                        },
-                        scales: {
-                            r: {
-                                angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
-                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
-                                suggestedMin: 0,
-                                suggestedMax: 100,
-                                pointLabels: { font: { size: 14, weight: '600' }, color: '#1e293b' },
-                                ticks: { stepSize: 20, callback: (value) => `${value}%` }
-                            }
-                        }
-                    }
-                });
-            }, []); // Función estable, no necesita dependencias si los argumentos son pasados
-
-            // --- Efectos de Carga y Guardado ---
-            
-            // Carga inicial (depende de setAnswers y setCompanyInfo, pero son estables)
-            useEffect(() => {
-                const saved = localStorage.getItem('maturityData');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    // Usamos la forma de callback o aseguramos que el valor inicial sea estable
-                    setAnswers(data.answers || {});
-                    setCompanyInfo(data.companyInfo || companyInfo); 
-                }
-            }, []); // Array de dependencias vacío, solo se ejecuta una vez al montar
+            // getProgress es estable
+            const getProgress = useCallback(() => {
+                const total = Object.keys(questionsData).reduce((sum, dim) => 
+                    sum + questionsData[dim].questions.length, 0);
+                const answered = Object.keys(questionsData).reduce((sum, dim) => 
+                    sum + Object.keys(answers[dim] || {}).length, 0);
+                return (answered / total) * 100;
+            }, [answers]);
 
             // Guardado (OK, solo depende de answers y companyInfo)
             useEffect(() => {
@@ -665,6 +635,7 @@
             // --- Renderizado Condicional ---
 
             let currentScreen = null;
+            const progress = getProgress();
 
             if (screen === 'welcome') {
                 currentScreen = (
@@ -683,9 +654,9 @@
                             <span className="subtitle">Evaluación en Curso: {questionsData[currentDim].title}</span>
                             <div className="progress-section">
                                 <div className="progress-bar-container">
-                                    <div className="progress-bar-fill" style={{ width: `${getProgress().toFixed(1)}%` }}></div>
+                                    <div className="progress-bar-fill" style={{ width: `${progress.toFixed(1)}%` }}></div>
                                 </div>
-                                <div className="progress-text">Progreso General: {getProgress().toFixed(1)}%</div>
+                                <div className="progress-text">Progreso General: {progress.toFixed(1)}%</div>
                             </div>
                         </div>
                         <FormScreen 
@@ -704,8 +675,6 @@
                         results={calculateResults()} 
                         companyInfo={companyInfo} 
                         getRoadmap={getRoadmap}
-                        drawChart={drawChart} // Función estable
-                        chartRef={chartRef}
                         setScreen={setScreen}
                     />
                 );
