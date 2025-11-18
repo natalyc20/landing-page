@@ -492,33 +492,40 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
     const roadmapSteps = getRoadmap(results.level);
     const formattedScore = results.normalizedScore.toFixed(1);
 
-    // 🛑 FUNCIÓN CORREGIDA Y OPTIMIZADA PARA PAGINACIÓN Y CSS (Solución final)
+    // 🛑 FUNCIÓN CORREGIDA Y OPTIMIZADA (SOLUCIÓN FINAL: Altura, Paginación, Estilos)
     const handleDownload = () => {
         const element = document.getElementById('reporte-contenido');
 
-        // 1. INYECTAR ESTILOS DE IMPRESIÓN (Solución agresiva para posicionamiento y hojas en blanco)
+        // 💥 GUARDAR Y FORZAR ALTURA: NECESARIO si tu CSS tiene max-height o overflow: auto
+        const originalMaxHeight = element.style.maxHeight;
+        const originalOverflow = element.style.overflow;
+
+        element.style.maxHeight = 'none'; // Desactiva límites de altura
+        element.style.overflow = 'visible'; // Permite que el contenido se expanda
+
+        // 1. INYECTAR ESTILOS DE IMPRESIÓN (Para posicionamiento y saltos de página)
         const style = document.createElement('style');
         style.id = 'pdf-temp-styles';
         style.textContent = `
-            /* 💥 CORRECCIÓN CRÍTICA: Fija un ancho más pequeño y elimina márgenes del contenedor. */
+            /* Fija un ancho seguro y elimina márgenes del contenedor. */
             #reporte-contenido {
-                width: 760px !important; /* Ancho más seguro (760px) para evitar desbordamiento */
+                width: 760px !important; 
                 max-width: 100%;
-                margin: 0 !important; /* Elimina cualquier margen o padding extraño */
+                margin: 0 !important; 
                 padding: 10px !important;
             }
             
             /* FUERZA a que las tarjetas y pasos del roadmap no se corten (hojas en blanco) */
             .dimension-result-card, 
             .roadmap-step,
-            .roadmap-section, /* Asegurar que la sección completa no se rompa */
+            .roadmap-section, 
             .score-hero {
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
-                page-break-after: avoid !important; /* Evita roturas inmediatamente después de secciones */
+                page-break-after: avoid !important; 
             }
             
-            /* Asegura que los fondos y colores se mantengan (score-hero) */
+            /* Asegura que los fondos y colores se mantengan */
             .score-hero {
                 -webkit-print-color-adjust: exact !important;
                 color-adjust: exact !important;
@@ -535,7 +542,6 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
         // El setTimeout es crítico para el gráfico (RadarChart)
         setTimeout(() => { 
             const options = {
-                // Simplificamos el margen. El margen en el PDF ahora es 10mm.
                 margin: 10, 
                 filename: `Reporte-Madurez-Digital-${companyInfo.name || 'Empresa'}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
@@ -551,11 +557,15 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
 
             // 2. Generar el PDF y encadenar la promesa para la limpieza
             html2pdf().set(options).from(element).save().then(() => {
-                // 3. LIMPIEZA: Eliminar los estilos temporales después de la descarga
+                // 3. LIMPIEZA: Restaurar estilos y eliminar CSS temporal
                 const tempStyles = document.getElementById('pdf-temp-styles');
                 if (tempStyles) {
                     document.head.removeChild(tempStyles);
                 }
+                
+                // ✅ RESTAURAR LA ALTURA Y EL DESBORDAMIENTO ORIGINALES
+                element.style.maxHeight = originalMaxHeight;
+                element.style.overflow = originalOverflow;
             });
         }, 1000); // 1 segundo de espera
     };
