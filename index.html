@@ -503,19 +503,19 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
         element.style.maxHeight = 'none'; // Desactiva límites de altura
         element.style.overflow = 'visible'; // Permite que el contenido se expanda
 
-        // 1. INYECTAR ESTILOS DE IMPRESIÓN (Para posicionamiento y saltos de página)
+        // 1. INYECTAR ESTILOS DE IMPRESIÓN (Consolidado y estricto)
         const style = document.createElement('style');
         style.id = 'pdf-temp-styles';
         style.textContent = `
-            /* Fija un ancho seguro y elimina márgenes del contenedor. */
+            /* 💥 CORRECCIÓN CRÍTICA: Fija un ancho más pequeño y elimina márgenes del contenedor. */
             #reporte-contenido {
-                width: 760px !important; 
+                width: 760px !important; /* Ancho más seguro para A4 */
                 max-width: 100%;
                 margin: 0 !important; 
                 padding: 10px !important;
             }
-            
-            /* FUERZA a que las tarjetas y pasos del roadmap no se corten (hojas en blanco) */
+
+            /* Evita que los bloques de contenido importante se corten o generen páginas en blanco */
             .dimension-result-card, 
             .roadmap-step,
             .roadmap-section, 
