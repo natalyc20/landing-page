@@ -492,30 +492,40 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
     const roadmapSteps = getRoadmap(results.level);
     const formattedScore = results.normalizedScore.toFixed(1);
 
-    // 🛑 FUNCIÓN CORREGIDA Y OPTIMIZADA (SOLUCIÓN FINAL: Altura, Paginación, Estilos)
+    // 🛑 FUNCIÓN CORREGIDA Y OPTIMIZADA (SOLUCIÓN MÁS AGRESIVA)
     const handleDownload = () => {
         const element = document.getElementById('reporte-contenido');
 
-        // 💥 GUARDAR Y FORZAR ALTURA: NECESARIO si tu CSS tiene max-height o overflow: auto
+        // 💥 GUARDAR Y FORZAR ALTURA: CRÍTICO para que el contenido no se corte
         const originalMaxHeight = element.style.maxHeight;
         const originalOverflow = element.style.overflow;
 
         element.style.maxHeight = 'none'; // Desactiva límites de altura
         element.style.overflow = 'visible'; // Permite que el contenido se expanda
 
-        // 1. INYECTAR ESTILOS DE IMPRESIÓN (Consolidado y estricto)
+        // 1. INYECTAR ESTILOS DE IMPRESIÓN (Máxima prioridad para anular cualquier CSS)
         const style = document.createElement('style');
         style.id = 'pdf-temp-styles';
         style.textContent = `
-            /* 💥 CORRECCIÓN CRÍTICA: Fija un ancho más pequeño y elimina márgenes del contenedor. */
-            #reporte-contenido {
-                width: 760px !important; /* Ancho más seguro para A4 */
-                max-width: 100%;
-                margin: 0 !important; 
-                padding: 10px !important;
+            /* 🚨 CORRECCIÓN EXTREMA DE BODY/HTML: Elimina márgenes y paddings globales */
+            html, body, .content {
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important; 
             }
 
-            /* Evita que los bloques de contenido importante se corten o generen páginas en blanco */
+            /* Fija un ancho seguro para A4 y resetea márgenes del contenedor del reporte */
+            #reporte-contenido {
+                width: 760px !important; 
+                max-width: 100% !important;
+                margin: 0 !important; 
+                padding: 15px !important; /* Ligeramente más padding interno */
+                box-sizing: border-box !important;
+            }
+
+            /* FUERZA a que los bloques de contenido importante no se corten o generen páginas en blanco */
             .dimension-result-card, 
             .roadmap-step,
             .roadmap-section, 
@@ -530,12 +540,6 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
                 -webkit-print-color-adjust: exact !important;
                 color-adjust: exact !important;
             }
-            
-            /* Resetea estilos de body/html que puedan estar empujando el contenido */
-            body, html, .content {
-                padding: 0 !important;
-                margin: 0 !important;
-            }
         `;
         document.head.appendChild(style);
 
@@ -546,7 +550,8 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
                 filename: `Reporte-Madurez-Digital-${companyInfo.name || 'Empresa'}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
-                    scale: 3, 
+                    // 💡 AJUSTE CRÍTICO: Reducir la escala a 2 permite capturar una imagen virtual más alta, previniendo el corte.
+                    scale: 2, 
                     logging: true, 
                     useCORS: true, 
                     allowTaint: true,
@@ -567,7 +572,7 @@ const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
                 element.style.maxHeight = originalMaxHeight;
                 element.style.overflow = originalOverflow;
             });
-        }, 1000); // 1 segundo de espera
+        }, 1000); 
     };
 
 
