@@ -487,41 +487,47 @@
             );
         };
 
-     const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
+const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
+    // Definiciones de variables y datos
     const roadmapSteps = getRoadmap(results.level);
     const formattedScore = results.normalizedScore.toFixed(1);
 
-    // 🛑 FUNCIÓN CORREGIDA PARA DESCARGA DE PDF
-   const ResultsScreen = ({ results, companyInfo, getRoadmap, setScreen }) => {
-    const roadmapSteps = getRoadmap(results.level);
-    const formattedScore = results.normalizedScore.toFixed(1);
-
-    // 🛑 FUNCIÓN CORREGIDA Y OPTIMIZADA PARA PAGINACIÓN Y CSS
+    // 🛑 FUNCIÓN CORREGIDA Y OPTIMIZADA PARA PAGINACIÓN Y CSS (Solución final)
     const handleDownload = () => {
         const element = document.getElementById('reporte-contenido');
 
-        // 1. INYECTAR ESTILOS DE IMPRESIÓN (Soluciona hojas en blanco y desbordamiento)
+        // 1. INYECTAR ESTILOS DE IMPRESIÓN (Solución agresiva para posicionamiento y hojas en blanco)
         const style = document.createElement('style');
         style.id = 'pdf-temp-styles';
         style.textContent = `
-            /* 💥 SOLUCIÓN PARA POSICIONAMIENTO Y DESBORDAMIENTO */
+            /* 💥 CORRECCIÓN CRÍTICA: Fija un ancho más pequeño y elimina márgenes del contenedor. */
             #reporte-contenido {
-                width: 780px !important; /* Fija un ancho seguro para A4 (menos de 794px) */
+                width: 760px !important; /* Ancho más seguro (760px) para evitar desbordamiento */
                 max-width: 100%;
-                margin: auto;
+                margin: 0 !important; /* Elimina cualquier margen o padding extraño */
+                padding: 10px !important;
             }
             
-            /* 💥 SOLUCIÓN PARA HOJAS EN BLANCO: Previene saltos dentro de tarjetas */
+            /* FUERZA a que las tarjetas y pasos del roadmap no se corten (hojas en blanco) */
             .dimension-result-card, 
             .roadmap-step,
+            .roadmap-section, /* Asegurar que la sección completa no se rompa */
             .score-hero {
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
+                page-break-after: avoid !important; /* Evita roturas inmediatamente después de secciones */
             }
-            /* Asegurar que los fondos y colores se mantengan (crucial para score-hero) */
+            
+            /* Asegura que los fondos y colores se mantengan (score-hero) */
             .score-hero {
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            /* Resetea estilos de body/html que puedan estar empujando el contenido */
+            body, html, .content {
+                padding: 0 !important;
+                margin: 0 !important;
             }
         `;
         document.head.appendChild(style);
@@ -529,7 +535,8 @@
         // El setTimeout es crítico para el gráfico (RadarChart)
         setTimeout(() => { 
             const options = {
-                margin: 10,
+                // Simplificamos el margen. El margen en el PDF ahora es 10mm.
+                margin: 10, 
                 filename: `Reporte-Madurez-Digital-${companyInfo.name || 'Empresa'}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
@@ -552,6 +559,8 @@
             });
         }, 1000); // 1 segundo de espera
     };
+
+
     return (
         <div className="content">
             {/* 🛑 Contenedor del reporte para la descarga */}
@@ -572,7 +581,6 @@
                     {/* Map de dimensiones: Asume que questionsData es accesible */}
                     {Object.keys(results.dimensions).map(dimKey => {
                         const dimResult = results.dimensions[dimKey];
-                        // ⚠️ Usar un fallback seguro por si 'questionsData' no está definido globalmente
                         const dimData = window.questionsData?.[dimKey] || { title: 'Dimensión Desconocida', icon: '❓' }; 
                         const dimScore = dimResult.percentage.toFixed(1);
 
@@ -596,12 +604,10 @@
                     <div className="roadmap-steps">
                         {roadmapSteps.map((step, index) => (
                             <div key={index} className="roadmap-step">
-                                {/* Usar index + 1 como número de paso si 'step.step' no es fiable */}
                                 <div className="roadmap-step-number">Paso {index + 1}</div> 
                                 <h4>{step.title}</h4>
                                 <p>{step.desc}</p>
                                 <ul>
-                                    {/* Mapeo seguro de acciones */}
                                     {step.actions && step.actions.map((action, i) => <li key={i}>{action}</li>)} 
                                 </ul>
                             </div>
