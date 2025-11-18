@@ -9,717 +9,104 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #1a202c;
-        }
-
-        .app-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 25px 70px rgba(0,0,0,0.35);
-            overflow: hidden;
-            animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            padding: 50px 40px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 200%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-            animation: shimmer 4s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .header .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.95;
-            font-weight: 500;
-            position: relative;
-            z-index: 1;
-        }
-
-        .badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.25);
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            margin-top: 15px;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .progress-section {
-            background: linear-gradient(to bottom, #f8fafc, #ffffff);
-            padding: 24px 40px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .progress-bar-container {
-            background: #e2e8f0;
-            height: 14px;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
-            border-radius: 20px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-
-        .progress-bar-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: progressShine 2s infinite;
-        }
-
-        @keyframes progressShine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .progress-text {
-            text-align: center;
-            margin-top: 12px;
-            font-weight: 700;
-            color: #3b82f6;
-            font-size: 1rem;
-        }
-
-        .content {
-            padding: 40px;
-        }
-
-        .welcome-content {
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .welcome-content h2 {
-            color: #1e3a8a;
-            font-size: 2rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .welcome-intro {
-            font-size: 1.1rem;
-            color: #475569;
-            line-height: 1.8;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
-            border-left: 5px solid #3b82f6;
-            padding: 24px;
-            border-radius: 12px;
-            margin: 25px 0;
-        }
-
-        .highlight-box h3 {
-            color: #1e3a8a;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .highlight-box ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .highlight-box li {
-            padding: 8px 0 8px 28px;
-            position: relative;
-            line-height: 1.6;
-            color: #334155;
-        }
-
-        .highlight-box li::before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #3b82f6;
-            font-weight: 900;
-            font-size: 1.2rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 700;
-            color: #1e293b;
-            font-size: 0.95rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s;
-            font-family: inherit;
-            background: #f8fafc;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-
-        .dimension-header {
-            background: linear-gradient(135deg, #f1f5f9 0%, #e0e7ff 100%);
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            border-left: 6px solid #3b82f6;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-
-        .dimension-header h2 {
-            color: #1e3a8a;
-            font-size: 1.8rem;
-            font-weight: 900;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .dimension-header p {
-            color: #475569;
-            line-height: 1.7;
-            font-size: 1.05rem;
-        }
-
-        .question-card {
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 28px;
-            margin-bottom: 20px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .question-card:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .question-card.answered {
-            border-color: #10b981;
-            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-        }
-
-        .question-header {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .question-number {
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            color: white;
-            min-width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-            flex-shrink: 0;
-        }
-
-        .question-text {
-            flex: 1;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #1e293b;
-            font-weight: 600;
-        }
-
-        .rating-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 12px;
-        }
-
-        .rating-option input[type="radio"] {
-            display: none;
-        }
-
-        .rating-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 16px 10px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #fafafa;
-            text-align: center;
-        }
-
-        .rating-label:hover {
-            border-color: #3b82f6;
-            background: #eff6ff;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-        }
-
-        .rating-option input:checked + .rating-label {
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            color: white;
-            border-color: #3b82f6;
-            font-weight: 700;
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-        }
-
-        .rating-value {
-            font-size: 2rem;
-            font-weight: 900;
-            margin-bottom: 4px;
-        }
-
-        .rating-desc {
-            font-size: 0.75rem;
-            opacity: 0.9;
-            font-weight: 600;
-        }
-
-        .btn {
-            padding: 16px 36px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.05rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-        }
-
-        .btn:active:not(:disabled) {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #64748b;
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .navigation {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 2px solid #e2e8f0;
-            gap: 16px;
-        }
-
-        .score-hero {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            padding: 60px 40px;
-            border-radius: 20px;
-            text-align: center;
-            margin-bottom: 40px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(30, 58, 138, 0.4);
-        }
-
-        .score-hero::before {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-            top: -200px;
-            right: -200px;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(-20px, 20px); }
-        }
-
-        .score-value {
-            font-size: 6rem;
-            font-weight: 900;
-            margin: 20px 0;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            line-height: 1;
-        }
-
-        .score-label {
-            font-size: 1.4rem;
-            opacity: 0.95;
-            font-weight: 600;
-            position: relative;
-            z-index: 1;
-        }
-
-        .level-badge {
-            display: inline-block;
-            padding: 14px 32px;
-            background: rgba(255,255,255,0.25);
-            border-radius: 30px;
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-top: 20px;
-            position: relative;
-            z-index: 1;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.4);
-        }
-
-        .dimensions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin: 40px 0;
-        }
-
-        .dimension-result-card {
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 28px;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .dimension-result-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
-            border-color: #3b82f6;
-        }
-
-        .dimension-result-card h3 {
-            color: #1e3a8a;
-            font-size: 1.15rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .dimension-score {
-            font-size: 3rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 12px 0;
-        }
-
-        .dimension-bar {
-            background: #e2e8f0;
-            height: 14px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 16px;
-        }
-
-        .dimension-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
-            border-radius: 10px;
-            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .roadmap-section {
-            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-            border-radius: 20px;
-            padding: 40px;
-            margin: 40px 0;
-            border-left: 6px solid #10b981;
-            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
-        }
-
-        .roadmap-section h3 {
-            color: #065f46;
-            font-size: 2rem;
-            font-weight: 900;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .roadmap-steps {
-            display: grid;
-            gap: 24px;
-        }
-
-        .roadmap-step {
-            background: white;
-            padding: 28px;
-            border-radius: 16px;
-            border-left: 5px solid #10b981;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            transition: all 0.3s;
-        }
-
-        .roadmap-step:hover {
-            transform: translateX(8px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-
-        .roadmap-step-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            border-radius: 50%;
-            font-weight: 900;
-            font-size: 1.2rem;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        .roadmap-step h4 {
-            color: #065f46;
-            font-size: 1.3rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-        }
-
-        .roadmap-step p {
-            color: #475569;
-            line-height: 1.7;
-            margin-bottom: 12px;
-        }
-
-        .roadmap-step ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .roadmap-step li {
-            padding: 6px 0 6px 24px;
-            position: relative;
-            color: #334155;
-            line-height: 1.6;
-        }
-
-        .roadmap-step li::before {
-            content: "→";
-            position: absolute;
-            left: 0;
-            color: #10b981;
-            font-weight: 900;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            margin: 40px 0;
-            flex-wrap: wrap;
-        }
-
-        .chart-container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            margin: 40px 0;
-            border: 2px solid #e2e8f0;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-        }
-
-        .chart-container h3 {
-            text-align: center;
-            color: #1e3a8a;
-            font-size: 1.8rem;
-            font-weight: 900;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            
-            .content {
-                padding: 24px;
-            }
-
-            .rating-options {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .dimensions-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .score-value {
-                font-size: 4rem;
-            }
-
-            .navigation {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        .scale-reference {
-            background: #eff6ff;
-            border: 2px solid #3b82f6;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .scale-reference h4 {
-            color: #1e3a8a;
-            font-size: 1.1rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-        }
-
-        .scale-items {
-            display: grid;
-            gap: 8px;
-        }
-
-        .scale-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.9rem;
-            color: #334155;
-        }
-
-        .scale-item-number {
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            flex-shrink: 0;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #1a202c; }
+        .app-container { max-width: 1100px; margin: 0 auto; background: white; border-radius: 24px; box-shadow: 0 25px 70px rgba(0,0,0,0.35); overflow: hidden; animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 50px 40px; text-align: center; position: relative; overflow: hidden; }
+        .header::before { content: ''; position: absolute; top: 0; left: -100%; width: 200%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); animation: shimmer 4s infinite; }
+        @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+        .header h1 { font-size: 2.5rem; font-weight: 900; margin-bottom: 12px; position: relative; z-index: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .header .subtitle { font-size: 1.2rem; opacity: 0.95; font-weight: 500; position: relative; z-index: 1; }
+        .badge { display: inline-block; background: rgba(255,255,255,0.25); padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; margin-top: 15px; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); }
+        .progress-section { background: linear-gradient(to bottom, #f8fafc, #ffffff); padding: 24px 40px; border-bottom: 1px solid #e2e8f0; }
+        .progress-bar-container { background: #e2e8f0; height: 14px; border-radius: 20px; overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%); border-radius: 20px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+        .progress-bar-fill::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: progressShine 2s infinite; }
+        @keyframes progressShine { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .progress-text { text-align: center; margin-top: 12px; font-weight: 700; color: #3b82f6; font-size: 1rem; }
+        .content { padding: 40px; }
+        .welcome-content { max-width: 700px; margin: 0 auto; }
+        .welcome-content h2 { color: #1e3a8a; font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 20px; }
+        .welcome-intro { font-size: 1.1rem; color: #475569; line-height: 1.8; text-align: center; margin-bottom: 30px; }
+        .highlight-box { background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%); border-left: 5px solid #3b82f6; padding: 24px; border-radius: 12px; margin: 25px 0; }
+        .highlight-box h3 { color: #1e3a8a; font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 8px 0 8px 28px; position: relative; line-height: 1.6; color: #334155; }
+        .highlight-box li::before { content: "✓"; position: absolute; left: 0; color: #3b82f6; font-weight: 900; font-size: 1.2rem; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 700; color: #1e293b; font-size: 0.95rem; }
+        .form-input { width: 100%; padding: 14px 18px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; transition: all 0.3s; font-family: inherit; background: #f8fafc; }
+        .form-input:focus { outline: none; border-color: #3b82f6; background: white; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        .dimension-header { background: linear-gradient(135deg, #f1f5f9 0%, #e0e7ff 100%); padding: 30px; border-radius: 16px; margin-bottom: 30px; border-left: 6px solid #3b82f6; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .dimension-header h2 { color: #1e3a8a; font-size: 1.8rem; font-weight: 900; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+        .dimension-header p { color: #475569; line-height: 1.7; font-size: 1.05rem; }
+        .question-card { background: white; border: 2px solid #e2e8f0; border-radius: 16px; padding: 28px; margin-bottom: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .question-card:hover { border-color: #3b82f6; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15); transform: translateY(-2px); }
+        .question-card.answered { border-color: #10b981; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); }
+        .question-header { display: flex; gap: 16px; margin-bottom: 20px; }
+        .question-number { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; min-width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); flex-shrink: 0; }
+        .question-text { flex: 1; font-size: 1.1rem; line-height: 1.6; color: #1e293b; font-weight: 600; }
+        .rating-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 12px; }
+        .rating-option input[type="radio"] { display: none; }
+        .rating-label { display: flex; flex-direction: column; align-items: center; padding: 16px 10px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.3s; background: #fafafa; text-align: center; }
+        .rating-label:hover { border-color: #3b82f6; background: #eff6ff; transform: translateY(-3px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); }
+        .rating-option input:checked + .rating-label { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; border-color: #3b82f6; font-weight: 700; transform: scale(1.05); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); }
+        .rating-value { font-size: 2rem; font-weight: 900; margin-bottom: 4px; }
+        .rating-desc { font-size: 0.75rem; opacity: 0.9; font-weight: 600; }
+        .btn { padding: 16px 36px; border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .btn:active:not(:disabled) { transform: scale(0.98); }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; }
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+        .navigation { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 30px; border-top: 2px solid #e2e8f0; gap: 16px; }
+        .score-hero { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 60px 40px; border-radius: 20px; text-align: center; margin-bottom: 40px; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(30, 58, 138, 0.4); }
+        .score-hero::before { content: ''; position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); top: -200px; right: -200px; animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-20px, 20px); } }
+        .score-value { font-size: 6rem; font-weight: 900; margin: 20px 0; position: relative; z-index: 1; text-shadow: 0 4px 20px rgba(0,0,0,0.2); line-height: 1; }
+        .score-label { font-size: 1.4rem; opacity: 0.95; font-weight: 600; position: relative; z-index: 1; }
+        .level-badge { display: inline-block; padding: 14px 32px; background: rgba(255,255,255,0.25); border-radius: 30px; font-size: 1.5rem; font-weight: 800; margin-top: 20px; position: relative; z-index: 1; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.4); }
+        .dimensions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin: 40px 0; }
+        .dimension-result-card { background: white; border: 2px solid #e2e8f0; border-radius: 16px; padding: 28px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .dimension-result-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.12); border-color: #3b82f6; }
+        .dimension-result-card h3 { color: #1e3a8a; font-size: 1.15rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .dimension-score { font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 12px 0; }
+        .dimension-bar { background: #e2e8f0; height: 14px; border-radius: 10px; overflow: hidden; margin-top: 16px; }
+        .dimension-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%); border-radius: 10px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .roadmap-section { background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-radius: 20px; padding: 40px; margin: 40px 0; border-left: 6px solid #10b981; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1); }
+        .roadmap-section h3 { color: #065f46; font-size: 2rem; font-weight: 900; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+        .roadmap-steps { display: grid; gap: 24px; }
+        .roadmap-step { background: white; padding: 28px; border-radius: 16px; border-left: 5px solid #10b981; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s; }
+        .roadmap-step:hover { transform: translateX(8px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .roadmap-step-number { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 50%; font-weight: 900; font-size: 1.2rem; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .roadmap-step h4 { color: #065f46; font-size: 1.3rem; font-weight: 800; margin-bottom: 12px; }
+        .roadmap-step p { color: #475569; line-height: 1.7; margin-bottom: 12px; }
+        .roadmap-step ul { list-style: none; padding: 0; }
+        .roadmap-step li { padding: 6px 0 6px 24px; position: relative; color: #334155; line-height: 1.6; }
+        .roadmap-step li::before { content: "→"; position: absolute; left: 0; color: #10b981; font-weight: 900; }
+        .action-buttons { display: flex; gap: 16px; justify-content: center; margin: 40px 0; flex-wrap: wrap; }
+        .chart-container { background: white; border-radius: 20px; padding: 40px; margin: 40px 0; border: 2px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .chart-container h3 { text-align: center; color: #1e3a8a; font-size: 1.8rem; font-weight: 900; margin-bottom: 30px; }
+        @media (max-width: 768px) { .header h1 { font-size: 1.8rem; } .content { padding: 24px; } .rating-options { grid-template-columns: repeat(3, 1fr); } .dimensions-grid { grid-template-columns: 1fr; } .score-value { font-size: 4rem; } .navigation { flex-direction: column; } .btn { width: 100%; justify-content: center; } }
+        .scale-reference { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 16px; padding: 20px; margin-bottom: 30px; }
+        .scale-reference h4 { color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; }
+        .scale-items { display: grid; gap: 8px; }
+        .scale-item { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: #334155; }
+        .scale-item-number { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useCallback } = React; // Importar useCallback
+        const Chart = window.Chart; // Asegurar que Chart.js esté disponible
 
-        // Cuestionario optimizado - 45 preguntas críticas en 6 dimensiones
+        // Cuestionario y Datos (Mantener intactos)
         const questionsData = {
             "D1": {
                 title: "Estrategia y Liderazgo Digital",
@@ -815,47 +202,375 @@
             { value: 5, label: "5", desc: "Óptimo" }
         ];
 
+        // --- Funciones de Lógica y Cálculo ---
+
+        const getLevel = (score) => {
+            if (score < 20) return { 
+                level: 0, 
+                name: "Nivel 0: Inicial", 
+                color: "#dc2626",
+                desc: "Sin estrategia digital, procesos manuales"
+            };
+            if (score < 40) return { 
+                level: 1, 
+                name: "Nivel 1: Emergente", 
+                color: "#ea580c",
+                desc: "Conciencia digital, iniciativas aisladas"
+            };
+            if (score < 60) return { 
+                level: 2, 
+                name: "Nivel 2: Definido", 
+                color: "#eab308",
+                desc: "Estrategia clara, herramientas implementadas"
+            };
+            if (score < 75) return { 
+                level: 3, 
+                name: "Nivel 3: Gestionado", 
+                color: "#3b82f6",
+                desc: "Procesos optimizados, cultura digital"
+            };
+            if (score < 90) return { 
+                level: 4, 
+                name: "Nivel 4: Optimizado", 
+                color: "#10b981",
+                desc: "Alta eficiencia, innovación continua"
+            };
+            return { 
+                level: 5, 
+                name: "Nivel 5: Exponencial", 
+                color: "#8b5cf6",
+                desc: "Digital-first, modelos disruptivos"
+            };
+        };
+
+        const getRoadmap = (level) => {
+            const roadmaps = {
+                0: [
+                    { step: 1, title: "Evaluación del Estado Actual (Hecho ✓)", desc: "Ya completaste este paso con esta evaluación. Ahora conoces tu punto de partida.", actions: ["Compartir resultados con equipo directivo", "Identificar 3 áreas críticas prioritarias"] },
+                    { step: 2, title: "Definición de la Estrategia Digital (Prioridad URGENTE)", desc: "Establecer visión clara, propósito y asignar recursos.", actions: ["Designar un responsable de transformación digital (CDO/VP Digital)", "Definir presupuesto inicial: 1-3% de ingresos anuales", "Crear comité de transformación digital con sponsors ejecutivos", "Documentar visión digital a 3 años con 5-7 objetivos SMART"] },
+                    { step: 3, title: "Optimización Operativa (Primeros 90 días)", desc: "Quick wins digitales que generen credibilidad.", actions: ["Digitalizar 2 procesos críticos (ej: CRM básico + firma electrónica)", "Implementar herramientas colaborativas (ej: Microsoft Teams/Slack)", "Capacitar en seguridad básica (phishing, contraseñas)"] }
+                ],
+                1: [
+                    { step: 1, title: "Consolidación de la Estrategia (Trimestre 1)", desc: "Formalizar la hoja de ruta digital y los recursos.", actions: ["Validar el Roadmap con la Junta Directiva.", "Asegurar la asignación formal de presupuesto y equipo de T.D.", "Formalizar roles y responsabilidades digitales."] },
+                    { step: 2, title: "Base de Tecnología y Datos (Trimestre 2)", desc: "Establecer una base tecnológica y de datos sólida y coherente.", actions: ["Integrar CRM y ERP para 'single source of truth'.", "Definir e implementar un protocolo de ciberseguridad básico (backups, MFA).", "Invertir en formación inicial en Data Analytics para liderazgo."] },
+                    { step: 3, title: "Experiencia del Cliente Digital (Trimestre 3)", desc: "Digitalizar el journey del cliente de forma coherente.", actions: ["Implementar tours virtuales y configuradores en al menos el 50% de los proyectos.", "Automatizar el marketing (Email Marketing y Retargeting básico).", "Establecer la medición sistemática de NPS/CSAT digital."] }
+                ],
+                2: [
+                    { step: 1, title: "Transformación de Procesos Centrales (Trimestre 1-2)", desc: "Moverse de herramientas a la integración de procesos (BIM).", actions: ["Adoptar BIM y crear estándares internos de modelos.", "Implementar un software de gestión de obra en tiempo real.", "Digitalizar completamente la gestión de subcontratistas y proveedores."] },
+                    { step: 2, title: "Cultura Digital y Talento (Trimestre 3)", desc: "Invertir en las personas que harán el cambio posible.", actions: ["Evaluar formalmente las brechas de competencias digitales por área.", "Lanzar un programa de upskilling/reskilling formal y continuo.", "Alinear incentivos (bonos) a resultados de proyectos digitales."] },
+                    { step: 3, title: "Análisis Predictivo Básico (Trimestre 4)", desc: "Usar datos para anticiparse en lugar de solo reaccionar.", actions: ["Crear dashboards ejecutivos que muestren tendencias y proyecciones (no solo hechos pasados).", "Modelar un análisis básico de rentabilidad por proyecto en tiempo real."] }
+                ],
+                3: [
+                    { step: 1, title: "Adopción de IA/ML (Trimestre 1-2)", desc: "Experimentar con tecnologías avanzadas en áreas de alto impacto.", actions: ["Lanzar 2-3 proyectos piloto con IA/ML (ej: gestión documental, lead scoring).", "Formalizar una metodología ágil (Scrum/Kanban) para nuevos proyectos digitales.", "Evaluar la implementación de IA generativa para tareas de diseño/marketing."] },
+                    { step: 2, title: "Modelo Operativo Digital (Trimestre 3)", desc: "Buscar la eficiencia máxima a través de la integración total.", actions: ["Lograr una integración total de sistemas (ERP, CRM, BIM, Gestión de Obra) vía APIs.", "Implementar el portal de postventa digital para autoservicio del cliente.", "Optimizar el flujo de caja y la planificación financiera con datos en tiempo real."] },
+                    { step: 3, title: "Alianzas Estratégicas (Trimestre 4)", desc: "Extender la innovación más allá de las paredes de la empresa.", actions: ["Establecer alianzas activas con 2-3 startups PropTech/ConTech relevantes.", "Participar en consorcios o grupos de trabajo de innovación sectorial.", "Incentivar un sandbox (entorno de pruebas) para la co-creación con proveedores."] }
+                ],
+                4: [
+                    { step: 1, title: "Ciberseguridad Avanzada y Gobernanza (Trimestre 1)", desc: "Blindar la operación digital y formalizar la toma de decisiones.", actions: ["Implementar un marco de Gobernanza de Datos (Data Governance).", "Obtener certificaciones de ciberseguridad (ej: ISO 27001).", "Formalizar el uso de Cloud Computing como estrategia principal."] },
+                    { step: 2, title: "Innovación Disfruptiva (Trimestre 2-3)", desc: "Invertir en tecnologías que pueden cambiar el modelo de negocio.", actions: ["Lanzar un proyecto de exploración en IOT (Sensores) o Smart Buildings/Homes.", "Destinar >1.5% de los ingresos a proyectos de Innovación.", "Evaluar nuevos modelos de negocio (ej: PropTech, servicios de valor añadido digital)."] },
+                    { step: 3, title: "Cultura Exponencial (Continuo)", desc: "Asegurar que la innovación sea una función de cada empleado.", actions: ["Crear un programa de embajadores digitales o intraemprendimiento.", "Revisar la estructura organizacional para que soporte la agilidad y la innovación.", "Lograr que el 90% de las decisiones se tomen con apoyo de la analítica de datos."] }
+                ],
+                5: [
+                    { step: 1, title: "Revisión Continua del Modelo de Negocio (Trimestral)", desc: "La digitalización es el núcleo del modelo, no solo un soporte.", actions: ["Identificar el próximo disruptor tecnológico (Web3, Realidad Extendida) y evaluar su impacto.", "Lanzar una spin-off o un nuevo negocio completamente digital.", "Realizar un benchmark contra líderes globales de la industria cada 6 meses."] },
+                    { step: 2, title: "Excelencia de Datos (Continuo)", desc: "Asegurar que la Inteligencia Artificial sea el motor de las decisiones.", actions: ["Implementar un sistema de Machine Learning para predecir precios, demanda y rentabilidad con alta precisión.", "Optimizar la experiencia del cliente para que sea 100% personalizada y proactiva.", "Automatizar el 75% de las tareas de gestión rutinarias."] },
+                    { step: 3, title: "Atracción del Mejor Talento Global (Continuo)", desc: "Ser un referente en la industria para el talento digital.", actions: ["Establecer acuerdos de investigación con universidades líderes.", "Crear un programa de atracción de talento remoto global y especializado.", "Mantener el presupuesto de formación/innovación por encima del 3% de los ingresos."] }
+                ]
+            };
+            return roadmaps[level.level] || roadmaps[0];
+        };
+        
+        // --- Componentes ---
+
+        const QuestionCard = ({ dim, qIndex, questionText, currentAnswer, handleAnswer }) => (
+            <div className={`question-card ${currentAnswer !== undefined ? 'answered' : ''}`}>
+                <div className="question-header">
+                    <div className="question-number">{qIndex + 1}</div>
+                    <p className="question-text">{questionText}</p>
+                </div>
+                <div className="rating-options">
+                    {ratingScale.map((scale) => (
+                        <label key={scale.value} className="rating-option">
+                            <input
+                                type="radio"
+                                name={`q-${dim}-${qIndex}`}
+                                value={scale.value}
+                                checked={currentAnswer === scale.value}
+                                onChange={() => handleAnswer(dim, qIndex, scale.value)}
+                            />
+                            <div className="rating-label">
+                                <span className="rating-value">{scale.label}</span>
+                                <span className="rating-desc">{scale.desc}</span>
+                            </div>
+                        </label>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const WelcomeScreen = ({ onStart, companyInfo, setCompanyInfo, setCurrentDim }) => {
+            const isFormComplete = companyInfo.name && companyInfo.evaluator;
+
+            return (
+                <div className="content welcome-content">
+                    <h2>🚀 Evaluación de Madurez Digital</h2>
+                    <p className="welcome-intro">
+                        Esta herramienta te ayudará a medir la **Madurez Digital** de tu empresa en 6 dimensiones clave.
+                        Responde honestamente con la escala de 0 (No existe) a 5 (Óptimo/Líder).
+                    </p>
+
+                    <div className="highlight-box">
+                        <h3>Instrucciones Rápidas</h3>
+                        <ul>
+                            <li>Solo 45 preguntas, aprox. 15-20 minutos.</li>
+                            <li>Las respuestas se guardan automáticamente.</li>
+                            <li>Los resultados te darán un *roadmap* de acción claro.</li>
+                        </ul>
+                    </div>
+                    
+                    <h3>Datos de la Evaluación</h3>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="companyName">Nombre de la Empresa</label>
+                        <input
+                            id="companyName"
+                            className="form-input"
+                            type="text"
+                            placeholder="Ej: Constructora Innova S.A."
+                            value={companyInfo.name}
+                            onChange={(e) => setCompanyInfo({ ...companyInfo, name: e.target.value })}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="evaluator">Evaluador / Rol</label>
+                        <input
+                            id="evaluator"
+                            className="form-input"
+                            type="text"
+                            placeholder="Ej: Gerente General / CDO"
+                            value={companyInfo.evaluator}
+                            onChange={(e) => setCompanyInfo({ ...companyInfo, evaluator: e.target.value })}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Fecha de Evaluación</label>
+                        <input
+                            className="form-input"
+                            type="date"
+                            value={companyInfo.date}
+                            onChange={(e) => setCompanyInfo({ ...companyInfo, date: e.target.value })}
+                        />
+                    </div>
+                    
+                    <div style={{ textAlign: 'center', marginTop: '30px' }}>
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => { setCurrentDim('D1'); onStart(); }}
+                            disabled={!isFormComplete}
+                        >
+                            Iniciar Evaluación (Comenzar con D1)
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const FormScreen = ({ currentDim, setCurrentDim, answers, handleAnswer, setScreen, getProgress }) => {
+            const dimensionsKeys = Object.keys(questionsData);
+            const currentDimIndex = dimensionsKeys.indexOf(currentDim);
+            const currentQuestions = questionsData[currentDim];
+            const totalDims = dimensionsKeys.length;
+            const nextDimKey = dimensionsKeys[currentDimIndex + 1];
+            const prevDimKey = dimensionsKeys[currentDimIndex - 1];
+
+            const isCurrentDimComplete = currentQuestions.questions.length === Object.keys(answers[currentDim] || {}).length;
+            const isLastDim = currentDimIndex === totalDims - 1;
+
+            return (
+                <div className="content">
+                    <div className="dimension-header">
+                        <h2>{currentQuestions.icon} {currentQuestions.title}</h2>
+                        <p>{currentQuestions.description}</p>
+                    </div>
+
+                    <div className="scale-reference">
+                        <h4>Escala de Puntuación (0 a 5)</h4>
+                        <div className="scale-items">
+                            {ratingScale.map(scale => (
+                                <div key={scale.value} className="scale-item">
+                                    <div className="scale-item-number">{scale.label}</div>
+                                    <span>{scale.desc}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {currentQuestions.questions.map((qText, qIndex) => (
+                        <QuestionCard
+                            key={qIndex}
+                            dim={currentDim}
+                            qIndex={qIndex}
+                            questionText={qText}
+                            currentAnswer={answers[currentDim] ? answers[currentDim][qIndex] : undefined}
+                            handleAnswer={handleAnswer}
+                        />
+                    ))}
+
+                    <div className="navigation">
+                        {prevDimKey && (
+                            <button 
+                                className="btn btn-secondary" 
+                                onClick={() => setCurrentDim(prevDimKey)}
+                            >
+                                ← Anterior: {questionsData[prevDimKey].title}
+                            </button>
+                        )}
+
+                        {!isLastDim && (
+                            <button 
+                                className="btn btn-primary" 
+                                onClick={() => setCurrentDim(nextDimKey)}
+                                disabled={!isCurrentDimComplete}
+                            >
+                                Siguiente: {questionsData[nextDimKey].title} →
+                            </button>
+                        )}
+
+                        {isLastDim && (
+                            <button 
+                                className="btn btn-success" 
+                                onClick={() => getProgress() === 100 ? setScreen('results') : alert('Asegúrate de responder todas las preguntas.')}
+                                disabled={!isCurrentDimComplete}
+                            >
+                                Finalizar y Ver Resultados
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ResultsScreen = ({ results, companyInfo, getRoadmap, drawChart, chartRef, setScreen }) => {
+            const roadmapSteps = getRoadmap(results.level);
+            
+            // Este useEffect ahora solo se ejecuta cuando results cambia.
+            // drawChart debe ser estable (definido con useCallback en App).
+            useEffect(() => {
+                if (results.normalizedScore > 0) {
+                    drawChart(results);
+                }
+            }, [results, drawChart]); 
+
+            const formattedScore = results.normalizedScore.toFixed(1);
+
+            const handleDownload = () => {
+                alert('Funcionalidad de descarga de PDF o datos no implementada en esta versión simple. Usa la opción "Imprimir" del navegador para guardar como PDF.');
+            };
+
+            return (
+                <div className="content">
+                    <div className="score-hero" style={{ background: results.level.color }}>
+                        <div className="subtitle">Reporte de Madurez Digital para: **{companyInfo.name}**</div>
+                        <h1 className="score-value">{formattedScore}<span style={{ fontSize: '2rem', fontWeight: 500 }}>%</span></h1>
+                        <div className="score-label">Puntuación de Madurez General</div>
+                        <div className="level-badge" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}>{results.level.name}</div>
+                        <div style={{ marginTop: '20px', fontSize: '1.05rem', opacity: 0.9 }}>
+                            {results.level.desc}
+                        </div>
+                    </div>
+
+                    <div className="chart-container">
+                        <h3>Análisis de Madurez por Dimensión</h3>
+                        <div style={{ height: '400px' }}>
+                            <canvas ref={chartRef}></canvas>
+                        </div>
+                    </div>
+
+                    <div className="dimensions-grid">
+                        {Object.keys(results.dimensions).map(dimKey => {
+                            const dimResult = results.dimensions[dimKey];
+                            const dimData = questionsData[dimKey];
+                            const dimScore = dimResult.percentage.toFixed(1);
+
+                            return (
+                                <div key={dimKey} className="dimension-result-card">
+                                    <h3>{dimData.icon} {dimData.title}</h3>
+                                    <div className="dimension-score">{dimScore}%</div>
+                                    <div className="dimension-bar">
+                                        <div className="dimension-bar-fill" style={{ width: `${dimScore}%` }}></div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    
+                    <div className="roadmap-section">
+                        <h3>{results.level.level < 5 ? "Próximos Pasos Recomendados" : "Excelencia Continua"}</h3>
+                        <p style={{ marginBottom: '30px', color: '#065f46', fontWeight: 500 }}>
+                            Basado en tu nivel de madurez **{results.level.name}**, este es el *roadmap* sugerido para avanzar al siguiente nivel:
+                        </p>
+                        <div className="roadmap-steps">
+                            {roadmapSteps.map((step, index) => (
+                                <div key={index} className="roadmap-step">
+                                    <div className="roadmap-step-number">Paso {step.step}</div>
+                                    <h4>{step.title}</h4>
+                                    <p>{step.desc}</p>
+                                    <ul>
+                                        {step.actions.map((action, i) => <li key={i}>{action}</li>)}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="action-buttons">
+                        <button className="btn btn-secondary" onClick={() => window.print()}>
+                            🖨️ Imprimir Reporte
+                        </button>
+                        <button className="btn btn-primary" onClick={handleDownload}>
+                            💾 Exportar PDF (Simulado)
+                        </button>
+                        <button className="btn btn-primary" onClick={() => setScreen('welcome')}>
+                            🔄 Reiniciar Evaluación
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- COMPONENTE PRINCIPAL (App) ---
+
         const App = () => {
             const [screen, setScreen] = useState('welcome');
             const [currentDim, setCurrentDim] = useState('D1');
             const [answers, setAnswers] = useState({});
-            const [companyInfo, setCompanyInfo] = useState({
-                name: '',
-                date: new Date().toISOString().split('T')[0],
-                evaluator: ''
-            });
-            const chartRef = useRef(null);
-            const chartInstance = useRef(null);
-
-            useEffect(() => {
+            const [companyInfo, setCompanyInfo] = useState(() => {
                 const saved = localStorage.getItem('maturityData');
                 if (saved) {
                     const data = JSON.parse(saved);
-                    setAnswers(data.answers || {});
-                    setCompanyInfo(data.companyInfo || companyInfo);
+                    return data.companyInfo || { name: '', date: new Date().toISOString().split('T')[0], evaluator: '' };
                 }
-            }, []);
-
-            useEffect(() => {
-                localStorage.setItem('maturityData', JSON.stringify({ answers, companyInfo }));
-            }, [answers, companyInfo]);
-
-            const handleAnswer = (dim, idx, val) => {
+                return { name: '', date: new Date().toISOString().split('T')[0], evaluator: '' };
+            });
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+            
+            // --- Handlers y Cálculos definidos con useCallback para estabilidad ---
+            
+            const handleAnswer = useCallback((dim, idx, val) => {
                 setAnswers(prev => ({
                     ...prev,
                     [dim]: { ...(prev[dim] || {}), [idx]: val }
                 }));
-            };
+            }, []); // Sin dependencias (estable)
 
-            const getProgress = () => {
+            const getProgress = useCallback(() => {
                 const total = Object.keys(questionsData).reduce((sum, dim) => 
                     sum + questionsData[dim].questions.length, 0);
                 const answered = Object.keys(questionsData).reduce((sum, dim) => 
                     sum + Object.keys(answers[dim] || {}).length, 0);
                 return (answered / total) * 100;
-            };
+            }, [answers]); // Depende solo de 'answers'
 
-            const calculateResults = () => {
+            const calculateResults = useCallback(() => {
                 const results = {};
                 let totalScore = 0;
                 let maxScore = 0;
@@ -879,628 +594,135 @@
                 const level = getLevel(normalizedScore);
 
                 return { dimensions: results, totalScore, maxScore, normalizedScore, level };
-            };
+            }, [answers]); // Depende solo de 'answers'
 
-            const getLevel = (score) => {
-                if (score < 20) return { 
-                    level: 0, 
-                    name: "Nivel 0: Inicial", 
-                    color: "#dc2626",
-                    desc: "Sin estrategia digital, procesos manuales"
-                };
-                if (score < 40) return { 
-                    level: 1, 
-                    name: "Nivel 1: Emergente", 
-                    color: "#ea580c",
-                    desc: "Conciencia digital, iniciativas aisladas"
-                };
-                if (score < 60) return { 
-                    level: 2, 
-                    name: "Nivel 2: Definido", 
-                    color: "#eab308",
-                    desc: "Estrategia clara, herramientas implementadas"
-                };
-                if (score < 75) return { 
-                    level: 3, 
-                    name: "Nivel 3: Gestionado", 
-                    color: "#3b82f6",
-                    desc: "Procesos optimizados, cultura digital"
-                };
-                if (score < 90) return { 
-                    level: 4, 
-                    name: "Nivel 4: Optimizado", 
-                    color: "#10b981",
-                    desc: "Alta eficiencia, innovación continua"
-                };
-                return { 
-                    level: 5, 
-                    name: "Nivel 5: Exponencial", 
-                    color: "#8b5cf6",
-                    desc: "Digital-first, modelos disruptivos"
-                };
-            };
+            const drawChart = useCallback((results) => {
+                const dimLabels = Object.keys(results.dimensions).map(key => questionsData[key].title);
+                const dataValues = Object.keys(results.dimensions).map(key => results.dimensions[key].percentage);
 
-            const getRoadmap = (level) => {
-                const roadmaps = {
-                    0: [
-                        {
-                            step: 1,
-                            title: "Evaluación del Estado Actual (Hecho ✓)",
-                            desc: "Ya completaste este paso con esta evaluación. Ahora conoces tu punto de partida.",
-                            actions: ["Compartir resultados con equipo directivo", "Identificar 3 áreas críticas prioritarias"]
-                        },
-                        {
-                            step: 2,
-                            title: "Definición de la Estrategia Digital (Prioridad URGENTE)",
-                            desc: "Establecer visión clara, propósito y asignar recursos.",
-                            actions: [
-                                "Designar un responsable de transformación digital (CDO/VP Digital)",
-                                "Definir presupuesto inicial: 1-3% de ingresos anuales",
-                                "Crear comité de transformación digital con sponsors ejecutivos",
-                                "Documentar visión digital a 3 años con 5-7 objetivos SMART"
-                            ]
-                        },
-                        {
-                            step: 3,
-                            title: "Optimización Operativa (Primeros 90 días)",
-                            desc: "Quick wins digitales que generen credibilidad.",
-                            actions: [
-                                "Digitalizar 2 procesos críticos (ej: CRM básico + firma electrónica)",
-                                "Implementar herramientas colaborativas (Microsoft 365 / Google Workspace)",
-                                "Migrar a facturación electrónica 100%",
-                                "Crear sitio web moderno y responsive"
-                            ]
-                        }
-                    ],
-                    1: [
-                        {
-                            step: 3,
-                            title: "Optimización Operativa (Próximos 6 meses)",
-                            desc: "Digitalizar y automatizar procesos core.",
-                            actions: [
-                                "Implementar BIM en proyectos nuevos (capacitar equipo técnico)",
-                                "Integrar CRM + ERP con datos unificados",
-                                "Automatizar marketing digital (email, ads, retargeting)",
-                                "Digitalizar gestión de obra con tablets y apps especializadas"
-                            ]
-                        },
-                        {
-                            step: 4,
-                            title: "Innovación en Modelo de Negocio Actual",
-                            desc: "Mejorar propuesta de valor con capacidades digitales.",
-                            actions: [
-                                "Lanzar tours virtuales 360° de proyectos",
-                                "Crear configurador digital de acabados",
-                                "Implementar app móvil para seguimiento de obra",
-                                "Ofrecer firma digital y proceso de compra 100% online"
-                            ]
-                        },
-                        {
-                            step: 5,
-                            title: "Desarrollo de Capacidades (Continuo)",
-                            desc: "Construir músculo digital en la organización.",
-                            actions: [
-                                "Programa de capacitación: 40+ horas/año por persona",
-                                "Certificaciones en herramientas clave (BIM, CRM, Agile)",
-                                "Contratar 2-3 perfiles digitales especializados",
-                                "Crear cultura de experimentación con 'viernes de innovación'"
-                            ]
-                        }
-                    ],
-                    2: [
-                        {
-                            step: 4,
-                            title: "Innovación en Modelo de Negocio",
-                            desc: "Explorar nuevas fuentes de ingresos digitales.",
-                            actions: [
-                                "Lanzar marketplace digital de acabados/proveedores",
-                                "Ofrecer servicios de co-living o suscripciones digitales",
-                                "Crear plataforma de gestión de comunidades residenciales",
-                                "Implementar modelos de venta por etapas 100% digital"
-                            ]
-                        },
-                        {
-                            step: 5,
-                            title: "Desarrollo de Capacidades Avanzadas",
-                            desc: "Escalar capacidades con tecnologías exponenciales.",
-                            actions: [
-                                "Crear laboratorio de innovación con presupuesto dedicado (0.5-1%)",
-                                "Implementar IA para análisis predictivo de demanda y precios",
-                                "Usar IoT y Smart Buildings en proyectos premium",
-                                "Establecer alianzas con 3-5 PropTech/ConTech"
-                            ]
-                        },
-                        {
-                            step: 6,
-                            title: "Modelo de Negocio Disruptivo (Exploración)",
-                            desc: "Experimentar con modelos radicalmente diferentes.",
-                            actions: [
-                                "Pilotos de construcción modular / impresión 3D",
-                                "Explorar tokenización de activos inmobiliarios (blockchain)",
-                                "Crear vertical de PropTech como línea de negocio",
-                                "Implementar gemelos digitales (digital twins) de edificios"
-                            ]
-                        }
-                    ],
-                    3: [
-                        {
-                            step: 6,
-                            title: "Modelo de Negocio Disruptivo",
-                            desc: "Escalar innovaciones disruptivas probadas.",
-                            actions: [
-                                "Lanzar plataforma PropTech como producto comercial",
-                                "Implementar construcción modular a escala",
-                                "Ofrecer servicios de Smart Buildings como servicio (SaaS)",
-                                "Crear marketplaces B2B para industria"
-                            ]
-                        },
-                        {
-                            step: 7,
-                            title: "Fusión Digital (Evolución Continua)",
-                            desc: "Integrar digital en el ADN organizacional.",
-                            actions: [
-                                "100% de procesos digitalizados y optimizados",
-                                "Cultura digital-first con equipos ágiles auto-organizados",
-                                "Ecosistema de partners digitales robusto",
-                                "Dashboard predictivo con IA para decisiones estratégicas",
-                                "Organización exponencial: escalable, ágil, data-driven"
-                            ]
-                        }
-                    ]
-                };
-
-                if (level >= 4) {
-                    return [
-                        {
-                            step: 7,
-                            title: "Fusión Digital - Mantener Liderazgo",
-                            desc: "Consolidar posición de líder digital del sector.",
-                            actions: [
-                                "Evangelizar transformación digital en el sector (conferencias, casos)",
-                                "Crear aceleradora o fondo de inversión en PropTech",
-                                "Exportar modelo de transformación a otras geografías",
-                                "Ser referente en adopción de tecnologías emergentes",
-                                "Cultivar ecosistema de innovación abierta"
-                            ]
-                        },
-                        {
-                            step: 0,
-                            title: "Ciclo Continuo: Re-evaluar",
-                            desc: "La transformación nunca termina.",
-                            actions: [
-                                "Re-evaluar madurez cada 6 meses",
-                                "Monitorear nuevas tecnologías exponenciales",
-                                "Experimentar constantemente (10-20 pilotos/año)",
-                                "Medir velocidad de aprendizaje como KPI crítico"
-                            ]
-                        }
-                    ];
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
                 }
 
-                return roadmaps[Math.min(level, 3)];
-            };
-
-            const createChart = (results) => {
                 if (!chartRef.current) return;
-                if (chartInstance.current) chartInstance.current.destroy();
 
                 const ctx = chartRef.current.getContext('2d');
-                const labels = Object.keys(questionsData).map(dim => 
-                    questionsData[dim].icon + ' ' + questionsData[dim].title.split(' ')[0]
-                );
-                const data = Object.keys(questionsData).map(dim => 
-                    results.dimensions[dim].percentage
-                );
-
                 chartInstance.current = new Chart(ctx, {
                     type: 'radar',
                     data: {
-                        labels: labels,
+                        labels: dimLabels,
                         datasets: [{
-                            label: 'Madurez (%)',
-                            data: data,
-                            fill: true,
-                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                            borderColor: 'rgb(59, 130, 246)',
-                            pointBackgroundColor: 'rgb(59, 130, 246)',
+                            label: 'Puntuación % de Madurez',
+                            data: dataValues,
+                            backgroundColor: 'rgba(59, 130, 246, 0.4)',
+                            borderColor: '#3b82f6',
+                            pointBackgroundColor: '#3b82f6',
                             pointBorderColor: '#fff',
                             pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgb(59, 130, 246)',
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            borderWidth: 3
+                            pointHoverBorderColor: '#3b82f6',
+                            borderWidth: 2
                         }]
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: true,
-                        scales: {
-                            r: {
-                                angleLines: { display: true, color: 'rgba(0,0,0,0.1)' },
-                                suggestedMin: 0,
-                                suggestedMax: 100,
-                                ticks: { stepSize: 20, font: { size: 12, weight: 'bold' } },
-                                pointLabels: { font: { size: 11, weight: 'bold' } }
-                            }
-                        },
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: { display: false },
-                            tooltip: {
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                padding: 12,
-                                titleFont: { size: 14, weight: 'bold' },
-                                bodyFont: { size: 13 },
-                                callbacks: {
-                                    label: (ctx) => ctx.parsed.r.toFixed(1) + '%'
-                                }
+                            tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)}%` } }
+                        },
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                suggestedMin: 0,
+                                suggestedMax: 100,
+                                pointLabels: { font: { size: 14, weight: '600' }, color: '#1e293b' },
+                                ticks: { stepSize: 20, callback: (value) => `${value}%` }
                             }
                         }
                     }
                 });
-            };
+            }, []); // Función estable, no necesita dependencias si los argumentos son pasados
 
-            const exportPDF = () => {
-                alert('Funcionalidad de exportación PDF disponible en versión completa. Por ahora, tome una captura de pantalla de los resultados.');
-            };
-
-            const reset = () => {
-                if (confirm('¿Reiniciar evaluación? Se perderán todos los datos.')) {
-                    setAnswers({});
-                    setCompanyInfo({ name: '', date: new Date().toISOString().split('T')[0], evaluator: '' });
-                    setScreen('welcome');
-                    setCurrentDim('D1');
-                    localStorage.clear();
+            // --- Efectos de Carga y Guardado ---
+            
+            // Carga inicial (depende de setAnswers y setCompanyInfo, pero son estables)
+            useEffect(() => {
+                const saved = localStorage.getItem('maturityData');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    // Usamos la forma de callback o aseguramos que el valor inicial sea estable
+                    setAnswers(data.answers || {});
+                    setCompanyInfo(data.companyInfo || companyInfo); 
                 }
-            };
+            }, []); // Array de dependencias vacío, solo se ejecuta una vez al montar
 
-            // WELCOME SCREEN
+            // Guardado (OK, solo depende de answers y companyInfo)
+            useEffect(() => {
+                localStorage.setItem('maturityData', JSON.stringify({ answers, companyInfo }));
+            }, [answers, companyInfo]);
+            
+            // --- Renderizado Condicional ---
+
+            let currentScreen = null;
+
             if (screen === 'welcome') {
-                return (
-                    <div className="app-container">
+                currentScreen = (
+                    <WelcomeScreen 
+                        onStart={() => setScreen('form')} 
+                        companyInfo={companyInfo} 
+                        setCompanyInfo={setCompanyInfo} 
+                        setCurrentDim={setCurrentDim}
+                    />
+                );
+            } else if (screen === 'form') {
+                currentScreen = (
+                    <>
                         <div className="header">
-                            <h1>🚀 Evaluación de Madurez Digital</h1>
-                            <p className="subtitle">Sector Inmobiliario y Constructor - Versión Ejecutiva</p>
-                            <div className="badge">⚡ 45 Preguntas Estratégicas | 20-30 minutos</div>
-                        </div>
-                        <div className="content welcome-content">
-                            <h2>Bienvenido a su Diagnóstico Digital</h2>
-                            <p className="welcome-intro">
-                                Esta herramienta optimizada evalúa la madurez digital de su organización en 
-                                <strong> 6 dimensiones críticas</strong> con <strong>45 preguntas estratégicas</strong>.
-                                Al finalizar, recibirá un roadmap personalizado basado en el 
-                                <strong> Modelo Integral de Evolución Digital Empresarial de 7 Pasos</strong>.
-                            </p>
-
-                            <div className="highlight-box">
-                                <h3>📋 Información de su Empresa</h3>
-                                <div className="form-group">
-                                    <label className="form-label">Nombre de la Empresa</label>
-                                    <input 
-                                        type="text"
-                                        className="form-input"
-                                        value={companyInfo.name}
-                                        onChange={(e) => setCompanyInfo({...companyInfo, name: e.target.value})}
-                                        placeholder="Ej: Constructora ABC S.A."
-                                    />
+                            <h1 style={{fontSize: '1.6rem', marginBottom: '8px'}}>{companyInfo.name}</h1>
+                            <span className="subtitle">Evaluación en Curso: {questionsData[currentDim].title}</span>
+                            <div className="progress-section">
+                                <div className="progress-bar-container">
+                                    <div className="progress-bar-fill" style={{ width: `${getProgress().toFixed(1)}%` }}></div>
                                 </div>
-                                <div className="form-group">
-                                    <label className="form-label">Fecha de Evaluación</label>
-                                    <input 
-                                        type="date"
-                                        className="form-input"
-                                        value={companyInfo.date}
-                                        onChange={(e) => setCompanyInfo({...companyInfo, date: e.target.value})}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label className="form-label">Evaluador(es)</label>
-                                    <input 
-                                        type="text"
-                                        className="form-input"
-                                        value={companyInfo.evaluator}
-                                        onChange={(e) => setCompanyInfo({...companyInfo, evaluator: e.target.value})}
-                                        placeholder="Ej: Juan Pérez - Gerente General"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="highlight-box">
-                                <h3>✨ Por qué esta evaluación es diferente</h3>
-                                <ul>
-                                    <li><strong>Rápida:</strong> 20-30 minutos vs. 60-90 min de evaluaciones extensas</li>
-                                    <li><strong>Estratégica:</strong> Solo preguntas críticas que realmente importan</li>
-                                    <li><strong>Accionable:</strong> Roadmap específico basado en modelo probado de 7 pasos</li>
-                                    <li><strong>Sectorial:</strong> 100% enfocada en inmobiliario y construcción</li>
-                                    <li><strong>Práctica:</strong> Sin jerga técnica innecesaria</li>
-                                </ul>
-                            </div>
-
-                            <div className="highlight-box">
-                                <h3>🎯 Las 6 Dimensiones que Evaluaremos</h3>
-                                {Object.keys(questionsData).map(dim => (
-                                    <div key={dim} style={{marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #ddd'}}>
-                                        <strong style={{color: '#1e3a8a', fontSize: '1.05rem'}}>
-                                            {questionsData[dim].icon} {questionsData[dim].title}
-                                        </strong>
-                                        <p style={{fontSize: '0.9rem', color: '#64748b', marginTop: '4px'}}>
-                                            {questionsData[dim].description}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div style={{textAlign: 'center', marginTop: '40px'}}>
-                                <button 
-                                    className="btn btn-primary"
-                                    onClick={() => setScreen('evaluation')}
-                                    style={{fontSize: '1.2rem', padding: '20px 48px'}}
-                                >
-                                    ▶️ Comenzar Evaluación
-                                </button>
+                                <div className="progress-text">Progreso General: {getProgress().toFixed(1)}%</div>
                             </div>
                         </div>
-                    </div>
+                        <FormScreen 
+                            currentDim={currentDim}
+                            setCurrentDim={setCurrentDim}
+                            answers={answers}
+                            handleAnswer={handleAnswer}
+                            setScreen={setScreen}
+                            getProgress={getProgress}
+                        />
+                    </>
+                );
+            } else if (screen === 'results') {
+                currentScreen = (
+                    <ResultsScreen 
+                        results={calculateResults()} 
+                        companyInfo={companyInfo} 
+                        getRoadmap={getRoadmap}
+                        drawChart={drawChart} // Función estable
+                        chartRef={chartRef}
+                        setScreen={setScreen}
+                    />
                 );
             }
-
-            // RESULTS SCREEN
-            if (screen === 'results') {
-                const results = calculateResults();
-                
-                useEffect(() => {
-                    createChart(results);
-                }, []);
-
-                const roadmap = getRoadmap(results.level.level);
-
-                return (
-                    <div className="app-container">
-                        <div className="header">
-                            <h1>📊 Sus Resultados</h1>
-                            <p className="subtitle">Diagnóstico Completo + Roadmap Personalizado</p>
-                        </div>
-
-                        <div className="content">
-                            <div className="score-hero">
-                                <div className="score-label">PUNTUACIÓN GLOBAL DE MADUREZ DIGITAL</div>
-                                <div className="score-value">{results.normalizedScore.toFixed(1)}</div>
-                                <div style={{fontSize: '1.2rem', opacity: 0.95}}>de 100 puntos</div>
-                                <div className="level-badge" style={{backgroundColor: results.level.color}}>
-                                    {results.level.name}
-                                </div>
-                                <div style={{ marginTop: '20px', fontSize: '1.05rem', opacity: 0.9 }}>
-                                    {results.level.desc}
-                                </div>
-                            </div>
-
-                            <div className="chart-container">
-                                <h3>📈 Radar de Madurez por Dimensión</h3>
-                                <div style={{maxWidth: '600px', margin: '0 auto'}}>
-                                    <canvas ref={chartRef}></canvas>
-                                </div>
-                            </div>
-
-                            <h3 style={{textAlign: 'center', color: '#1e3a8a', fontSize: '2rem', fontWeight: '900', margin: '40px 0 24px'}}>
-                                📊 Detalle por Dimensión
-                            </h3>
-
-                            <div className="dimensions-grid">
-                                {Object.keys(questionsData).map(dim => {
-                                    const pct = results.dimensions[dim].percentage;
-                                    let status = '⚠ Crítico';
-                                    let color = '#dc2626';
-                                    if (pct >= 75) { status = '✓ Excelente'; color = '#10b981'; }
-                                    else if (pct >= 60) { status = '→ Bueno'; color = '#3b82f6'; }
-                                    else if (pct >= 40) { status = '⚠ Mejorable'; color = '#eab308'; }
-
-                                    return (
-                                        <div key={dim} className="dimension-result-card">
-                                            <h3>{questionsData[dim].icon} {questionsData[dim].title}</h3>
-                                            <div className="dimension-score">{pct.toFixed(1)}%</div>
-                                            <div style={{fontSize: '0.85rem', color: '#64748b', marginBottom: '8px'}}>
-                                                {results.dimensions[dim].score} de {results.dimensions[dim].maxScore} puntos
-                                            </div>
-                                            <div style={{
-                                                display: 'inline-block',
-                                                padding: '6px 14px',
-                                                borderRadius: '12px',
-                                                fontSize: '0.8rem',
-                                                fontWeight: '700',
-                                                color: 'white',
-                                                backgroundColor: color,
-                                                marginBottom: '12px'
-                                            }}>
-                                                {status}
-                                            </div>
-                                            <div className="dimension-bar">
-                                                <div className="dimension-bar-fill" style={{width: `${pct}%`}}></div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            <div className="roadmap-section">
-                                <h3>🗺️ Su Roadmap de Transformación Digital</h3>
-                                <p style={{fontSize: '1.1rem', color: '#065f46', marginBottom: '24px', lineHeight: '1.7'}}>
-                                    Basado en su nivel <strong>{results.level.name}</strong>, estos son los próximos pasos 
-                                    recomendados según el <strong>Modelo Integral de Evolución Digital Empresarial</strong>:
-                                </p>
-
-                                <div className="roadmap-steps">
-                                    {roadmap.map((step, idx) => (
-                                        <div key={idx} className="roadmap-step">
-                                            <div className="roadmap-step-number">{step.step}</div>
-                                            <h4>{step.title}</h4>
-                                            <p>{step.desc}</p>
-                                            <ul>
-                                                {step.actions.map((action, i) => (
-                                                    <li key={i}>{action}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div style={{
-                                    marginTop: '30px',
-                                    padding: '24px',
-                                    background: 'white',
-                                    borderRadius: '12px',
-                                    border: '2px solid #10b981'
-                                }}>
-                                    <h4 style={{color: '#065f46', marginBottom: '12px', fontSize: '1.2rem'}}>
-                                        💡 Próximos Pasos Inmediatos
-                                    </h4>
-                                    <ol style={{paddingLeft: '20px', color: '#334155'}}>
-                                        <li style={{marginBottom: '8px'}}>Compartir estos resultados con equipo directivo</li>
-                                        <li style={{marginBottom: '8px'}}>Agendar sesión de trabajo para priorizar acciones (2-3 horas)</li>
-                                        <li style={{marginBottom: '8px'}}>Asignar responsable de cada paso del roadmap</li>
-                                        <li style={{marginBottom: '8px'}}>Establecer fechas y presupuesto para primeras 3 acciones</li>
-                                        <li style={{marginBottom: '8px'}}>Re-evaluar progreso en 6 meses</li>
-                                    </ol>
-                                </div>
-                            </div>
-
-                            <div className="action-buttons">
-                                <button className="btn btn-success" onClick={exportPDF}>
-                                    📄 Exportar Resultados
-                                </button>
-                                <button className="btn btn-primary" onClick={() => setScreen('evaluation')}>
-                                    ✏️ Revisar Respuestas
-                                </button>
-                                <button className="btn btn-secondary" onClick={reset}>
-                                    🔄 Nueva Evaluación
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-
-            // EVALUATION SCREEN
-            const dimData = questionsData[currentDim];
-            const dimKeys = Object.keys(questionsData);
-            const dimIndex = dimKeys.indexOf(currentDim);
-            const isLast = dimIndex === dimKeys.length - 1;
-
+            
             return (
                 <div className="app-container">
-                    <div className="header">
-                        <h1>{dimData.icon} {dimData.title}</h1>
-                        <p className="subtitle">{dimData.questions.length} preguntas | Dimensión {dimIndex + 1} de {dimKeys.length}</p>
-                    </div>
-
-                    <div className="progress-section">
-                        <div className="progress-bar-container">
-                            <div className="progress-bar-fill" style={{width: `${getProgress()}%`}}></div>
-                        </div>
-                        <div className="progress-text">
-                            {getProgress().toFixed(0)}% Completado
-                        </div>
-                    </div>
-
-                    <div className="content">
-                        <div className="dimension-header">
-                            <h2>{dimData.icon} {dimData.title}</h2>
-                            <p>{dimData.description}</p>
-                        </div>
-
-                        <div className="scale-reference">
-                            <h4>📏 Escala de Evaluación</h4>
-                            <div className="scale-items">
-                                {ratingScale.map(scale => (
-                                    <div key={scale.value} className="scale-item">
-                                        <div className="scale-item-number">{scale.value}</div>
-                                        <div><strong>{scale.desc}</strong></div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {dimData.questions.map((q, idx) => {
-                            const isAnswered = answers[currentDim]?.[idx] !== undefined;
-                            
-                            return (
-                                <div key={idx} className={`question-card ${isAnswered ? 'answered' : ''}`}>
-                                    <div className="question-header">
-                                        <div className="question-number">{idx + 1}</div>
-                                        <div className="question-text">{q}</div>
-                                    </div>
-
-                                    <div className="rating-options">
-                                        {ratingScale.map(rating => (
-                                            <div key={rating.value} className="rating-option">
-                                                <input
-                                                    type="radio"
-                                                    id={`${currentDim}-${idx}-${rating.value}`}
-                                                    name={`${currentDim}-${idx}`}
-                                                    value={rating.value}
-                                                    checked={answers[currentDim]?.[idx] === rating.value}
-                                                    onChange={() => handleAnswer(currentDim, idx, rating.value)}
-                                                />
-                                                <label 
-                                                    className="rating-label"
-                                                    htmlFor={`${currentDim}-${idx}-${rating.value}`}
-                                                >
-                                                    <span className="rating-value">{rating.label}</span>
-                                                    <span className="rating-desc">{rating.desc}</span>
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })}
-
-                        <div className="navigation">
-                            <button
-                                className="btn btn-secondary"
-                                onClick={() => {
-                                    if (dimIndex > 0) {
-                                        setCurrentDim(dimKeys[dimIndex - 1]);
-                                        window.scrollTo(0, 0);
-                                    }
-                                }}
-                                disabled={dimIndex === 0}
-                            >
-                                ◀️ Anterior
-                            </button>
-
-                            {!isLast ? (
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={() => {
-                                        setCurrentDim(dimKeys[dimIndex + 1]);
-                                        window.scrollTo(0, 0);
-                                    }}
-                                >
-                                    Siguiente ▶️
-                                </button>
-                            ) : (
-                                <button
-                                    className="btn btn-success"
-                                    onClick={() => {
-                                        const prog = getProgress();
-                                        if (prog < 70) {
-                                            if (!confirm(`Has completado ${prog.toFixed(0)}% de la evaluación. Para resultados óptimos, recomendamos completar al menos 80%.\n\n¿Ver resultados parciales?`)) {
-                                                return;
-                                            }
-                                        }
-                                        setScreen('results');
-                                        window.scrollTo(0, 0);
-                                    }}
-                                >
-                                    ✅ Ver Resultados
-                                </button>
-                            )}
-                        </div>
-                    </div>
+                    {currentScreen}
                 </div>
             );
         };
+        
+        // --- INICIALIZACIÓN DE REACT ---
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
